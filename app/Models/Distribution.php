@@ -13,10 +13,11 @@ class Distribution extends Model
         'nomor_distribusi',
         'program_id',
         'mustahiq_id',
+        'jenis_bantuan',
         'jumlah',
         'tanggal_distribusi',
-        'keterangan',
         'bukti_distribusi',
+        'keterangan',
         'status',
         'distributed_by'
     ];
@@ -39,5 +40,11 @@ class Distribution extends Model
     public function distributor()
     {
         return $this->belongsTo(User::class, 'distributed_by');
+    }
+
+    // Relationship with FundDistribution based on data-relationships.json
+    public function fundDistribution()
+    {
+        return $this->hasOne(FundDistribution::class);
     }
 }

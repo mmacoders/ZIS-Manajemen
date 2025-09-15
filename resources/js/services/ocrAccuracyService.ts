@@ -60,21 +60,21 @@ export class OCRAccuracyService {
         field: 'nik',
         type: 'length',
         rule: 16,
-        message: 'NIK must be exactly 16 digits',
+        message: 'NIK harus terdiri dari 16 digit',
         severity: 'error'
       },
       {
         field: 'nik',
         type: 'pattern',
         rule: /^[0-9]{16}$/,
-        message: 'NIK must contain only numbers',
+        message: 'NIK hanya boleh mengandung angka',
         severity: 'error'
       },
       {
         field: 'nik',
         type: 'custom',
         rule: (value: string) => this.validateIndonesianNIK(value),
-        message: 'NIK format does not match Indonesian standard',
+        message: 'Format NIK tidak sesuai dengan standar Indonesia',
         severity: 'warning'
       }
     ])
@@ -85,7 +85,7 @@ export class OCRAccuracyService {
         field: 'phoneNumber',
         type: 'pattern',
         rule: /^(\+62|62|0)[\d\-\s]{8,13}$/,
-        message: 'Phone number format is not valid for Indonesia',
+        message: 'Format nomor telepon tidak valid untuk Indonesia',
         severity: 'warning'
       }
     ])
@@ -96,14 +96,14 @@ export class OCRAccuracyService {
         field: 'amount',
         type: 'range',
         rule: [1000, 100000000], // Min 1k, Max 100M IDR
-        message: 'Amount seems unrealistic for ZIS transaction',
+        message: 'Jumlah tampak tidak realistis untuk transaksi ZIS',
         severity: 'warning'
       },
       {
         field: 'amount',
         type: 'custom',
         rule: (value: number) => value > 0,
-        message: 'Amount must be positive',
+        message: 'Jumlah harus positif',
         severity: 'error'
       }
     ])
@@ -114,14 +114,14 @@ export class OCRAccuracyService {
         field: 'date',
         type: 'custom',
         rule: (value: string) => this.isValidDate(value),
-        message: 'Date format is invalid',
+        message: 'Format tanggal tidak valid',
         severity: 'error'
       },
       {
         field: 'date',
         type: 'custom',
         rule: (value: string) => this.isReasonableDate(value),
-        message: 'Date seems unrealistic (too far in past/future)',
+        message: 'Tanggal tampak tidak realistis (terlalu jauh di masa lalu/depan)',
         severity: 'warning'
       }
     ])
@@ -132,14 +132,14 @@ export class OCRAccuracyService {
         field: 'name',
         type: 'length',
         rule: [2, 50],
-        message: 'Name length should be between 2 and 50 characters',
+        message: 'Panjang nama harus antara 2 dan 50 karakter',
         severity: 'warning'
       },
       {
         field: 'name',
         type: 'pattern',
         rule: /^[a-zA-Z\s\.\']+$/,
-        message: 'Name contains invalid characters',
+        message: 'Nama mengandung karakter yang tidak valid',
         severity: 'warning'
       }
     ])

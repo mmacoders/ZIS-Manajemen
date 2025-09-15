@@ -44,4 +44,10 @@ class ZisTransaction extends Model
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    // Relationship with FundReceipt based on data-relationships.json
+    public function fundReceipt()
+    {
+        return $this->hasOne(FundReceipt::class);
+    }
 }

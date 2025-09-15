@@ -91,16 +91,16 @@
       <div v-if="ocrResults && !isProcessing" class="space-y-3">
         <!-- Multi-language Detection Results -->
         <div v-if="multiLanguageResults" class="bg-purple-50 border border-purple-200 rounded-lg p-3">
-          <h4 class="text-xs font-semibold text-purple-900 mb-1">Multi-language Detection Results</h4>
+          <h4 class="text-xs font-semibold text-purple-900 mb-1">Hasil Deteksi Multi-bahasa</h4>
           <div class="space-y-1">
             <div class="flex items-center justify-between">
-              <span class="text-xs text-purple-700">Detected Language:</span>
+              <span class="text-xs text-purple-700">Bahasa Terdeteksi:</span>
               <span class="text-xs font-medium text-purple-900">
                 {{ getLanguageName(multiLanguageResults.detectedLanguage) }}
               </span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-xs text-purple-700">Language Confidence:</span>
+              <span class="text-xs text-purple-700">Tingkat Kepercayaan Bahasa:</span>
               <span class="text-xs font-medium text-purple-900">
                 {{ Math.round(multiLanguageResults.languageConfidence) }}%
               </span>
@@ -109,7 +109,7 @@
                   
           <!-- Alternative Results -->
           <div v-if="multiLanguageResults.alternativeResults && multiLanguageResults.alternativeResults.length > 0" class="mt-2">
-            <h5 class="text-xs font-medium text-purple-800 mb-1">Alternative Results:</h5>
+            <h5 class="text-xs font-medium text-purple-800 mb-1">Hasil Alternatif:</h5>
             <div class="space-y-1">
               <div 
                 v-for="alt in multiLanguageResults.alternativeResults" 
@@ -413,9 +413,9 @@ const handleAutoDetectChange = (enabled: boolean, languages: string[]) => {
 
 const getLanguageName = (code: string): string => {
   const languageMap: Record<string, string> = {
-    'ind': 'Indonesian',
-    'ara': 'Arabic',
-    'eng': 'English'
+    'ind': 'Indonesia',
+    'ara': 'Arab',
+    'eng': 'Inggris'
   }
   return languageMap[code] || code.toUpperCase()
 }

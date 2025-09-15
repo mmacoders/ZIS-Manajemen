@@ -8,13 +8,17 @@ use App\Models\Program;
 use App\Events\DistributionCompleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class DistributionController extends Controller
 {
     public function index()
     {
         $distributions = Distribution::with(['program', 'mustahiq', 'distributor'])->paginate(20);
-        return response()->json($distributions);
+        return response()->json([
+            'success' => true,
+            'data' => $distributions
+        ]);
     }
 
     public function store(Request $request)
@@ -22,43 +26,71 @@ class DistributionController extends Controller
         $request->validate([
             'program_id' => 'required|exists:programs,id',
             'mustahiq_id' => 'required|exists:mustahiq,id',
+            'jenis_bantuan' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
             'tanggal_distribusi' => 'required|date',
+            'bukti_distribusi' => 'nullable|string',
             'keterangan' => 'nullable|string',
-            'bukti_distribusi' => 'nullable|string'
+            'status' => 'required|in:pending,completed,cancelled'
         ]);
 
         $data = $request->all();
         $data['nomor_distribusi'] = 'DIST-' . date('Ymd') . '-' . Str::random(6);
-        $data['distributed_by'] = auth()->id();
+        // Using Auth facade directly for better Intelephense compatibility
+        $data['distributed_by'] = Auth::id();
         
         $distribution = Distribution::create($data);
 
         // Update program dana terkumpul
         $program = Program::find($request->program_id);
-        $program->increment('dana_terkumpul', $request->jumlah);
+        if ($program) {
+            $program->increment('dana_terkumpul', $request->jumlah);
+        }
 
-        return response()->json($distribution->load(['program', 'mustahiq', 'distributor']), 201);
+        return response()->json([
+            'success' => true,
+            'data' => $distribution->load(['program', 'mustahiq', 'distributor'])
+        ], 201);
     }
 
     public function show($id)
     {
-        $distribution = Distribution::with(['program', 'mustahiq', 'distributor'])->findOrFail($id);
-        return response()->json($distribution);
+        $distribution = Distribution::with(['program', 'mustahiq', 'distributor'])->find($id);
+        
+        if (!$distribution) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Distribution not found'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'data' => $distribution
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-        $distribution = Distribution::findOrFail($id);
+        $distribution = Distribution::find($id);
+        
+        if (!$distribution) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Distribution not found'
+            ], 404);
+        }
+        
         $oldAmount = $distribution->jumlah;
         
         $request->validate([
             'program_id' => 'required|exists:programs,id',
             'mustahiq_id' => 'required|exists:mustahiq,id',
+            'jenis_bantuan' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
             'tanggal_distribusi' => 'required|date',
-            'keterangan' => 'nullable|string',
             'bukti_distribusi' => 'nullable|string',
+            'keterangan' => 'nullable|string',
             'status' => 'required|in:pending,completed,cancelled'
         ]);
 
@@ -72,23 +104,40 @@ class DistributionController extends Controller
         // Update program dana terkumpul if amount changed
         if ($oldAmount != $request->jumlah) {
             $program = Program::find($request->program_id);
-            $program->decrement('dana_terkumpul', $oldAmount);
-            $program->increment('dana_terkumpul', $request->jumlah);
+            if ($program) {
+                $program->decrement('dana_terkumpul', $oldAmount);
+                $program->increment('dana_terkumpul', $request->jumlah);
+            }
         }
 
-        return response()->json($distribution->load(['program', 'mustahiq', 'distributor']));
+        return response()->json([
+            'success' => true,
+            'data' => $distribution->load(['program', 'mustahiq', 'distributor'])
+        ]);
     }
 
     public function destroy($id)
     {
-        $distribution = Distribution::findOrFail($id);
+        $distribution = Distribution::find($id);
+        
+        if (!$distribution) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Distribution not found'
+            ], 404);
+        }
         
         // Decrease program dana terkumpul
         $program = Program::find($distribution->program_id);
-        $program->decrement('dana_terkumpul', $distribution->jumlah);
+        if ($program) {
+            $program->decrement('dana_terkumpul', $distribution->jumlah);
+        }
         
         $distribution->delete();
-        return response()->json(['message' => 'Distribution deleted successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Distribution deleted successfully'
+        ]);
     }
 
     public function report(Request $request)
@@ -121,8 +170,11 @@ class DistributionController extends Controller
         ];
 
         return response()->json([
-            'distributions' => $distributions,
-            'summary' => $summary
+            'success' => true,
+            'data' => [
+                'distributions' => $distributions,
+                'summary' => $summary
+            ]
         ]);
     }
 }

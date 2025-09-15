@@ -8,9 +8,31 @@ use Illuminate\Http\Request;
 
 class UpzController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $upz = Upz::with('zisTransactions')->paginate(20);
+        $query = Upz::with('zisTransactions');
+        
+        // Add search functionality
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('kode', 'like', "%{$search}%")
+                  ->orWhere('alamat', 'like', "%{$search}%");
+            });
+        }
+        
+        // Add filter by validation status
+        if ($request->has('validasi')) {
+            $query->where('validasi', $request->validasi);
+        }
+        
+        // Add filter by deposit type
+        if ($request->has('jenis_setoran')) {
+            $query->where('jenis_setoran', $request->jenis_setoran);
+        }
+        
+        $upz = $query->paginate(20);
         return response()->json($upz);
     }
 
@@ -22,7 +44,12 @@ class UpzController extends Controller
             'alamat' => 'required|string',
             'pic_nama' => 'required|string',
             'pic_telepon' => 'required|string',
-            'status' => 'required|in:aktif,nonaktif'
+            'status' => 'required|in:aktif,nonaktif',
+            'tanggal_setoran' => 'nullable|date',
+            'jumlah_setoran' => 'nullable|numeric|min:0',
+            'bukti_transfer' => 'nullable|string',
+            'jenis_setoran' => 'nullable|in:zakat,infaq,sedekah',
+            'validasi' => 'required|in:pending,verified,rejected'
         ]);
 
         $upz = Upz::create($request->all());
@@ -45,7 +72,12 @@ class UpzController extends Controller
             'alamat' => 'required|string',
             'pic_nama' => 'required|string',
             'pic_telepon' => 'required|string',
-            'status' => 'required|in:aktif,nonaktif'
+            'status' => 'required|in:aktif,nonaktif',
+            'tanggal_setoran' => 'nullable|date',
+            'jumlah_setoran' => 'nullable|numeric|min:0',
+            'bukti_transfer' => 'nullable|string',
+            'jenis_setoran' => 'nullable|in:zakat,infaq,sedekah',
+            'validasi' => 'required|in:pending,verified,rejected'
         ]);
 
         $upz->update($request->all());

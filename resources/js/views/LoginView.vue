@@ -38,7 +38,7 @@
             />
           </div>
           <div>
-            <label for="password" class="sr-only">Password</label>
+            <label for="password" class="sr-only">Kata Sandi</label>
             <input
               id="password"
               v-model="form.password"
@@ -47,7 +47,7 @@
               autocomplete="current-password"
               required
               class="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
+              placeholder="Kata Sandi"
             />
           </div>
         </div>
@@ -67,7 +67,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              Loading...
+              Memuat...
             </span>
             <span v-else>Masuk</span>
           </button>
@@ -75,7 +75,7 @@
 
         <div class="text-center">
           <p class="text-sm text-gray-600">
-            Demo Credentials:
+            Kredensial Demo:
           </p>
           <div class="mt-2 space-y-1 text-xs text-gray-500">
             <div>Admin: admin@zis.com / password</div>
@@ -107,10 +107,13 @@ const error = ref('')
 const handleLogin = async () => {
   try {
     error.value = ''
+    console.log('Attempting login with credentials:', form.value)
     await authStore.login(form.value)
+    console.log('Login successful, redirecting to dashboard')
     router.push('/dashboard')
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Login failed. Please try again.'
+    console.error('Login failed:', err)
+    error.value = err.response?.data?.message || err.message || 'Login failed. Please try again.'
   }
 }
 </script>

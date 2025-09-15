@@ -28,11 +28,18 @@
             </router-link>
           </li>
 
-          <!-- Bidang 1 - Pengumpulan & Akuntansi Syariah -->
+          <!-- Bidang 1 - Pengumpulan -->
           <li v-if="canAccess(['admin', 'bidang1'])">
-            <div class="nav-section">Pengumpulan</div>
+            <router-link
+              to="/pengumpulan"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'Pengumpulan' }"
+            >
+              <BarChart3 class="w-5 h-5" />
+              <span>Bidang 1 - Pengumpulan</span>
+            </router-link>
           </li>
-          <li v-if="canAccess(['admin', 'bidang1'])">
+          <li v-if="canAccess(['admin', 'bidang1'])" class="ml-6">
             <router-link
               to="/muzakki"
               class="nav-link"
@@ -42,7 +49,7 @@
               <span>Data Muzakki</span>
             </router-link>
           </li>
-          <li v-if="canAccess(['admin', 'bidang1'])">
+          <li v-if="canAccess(['admin', 'bidang1'])" class="ml-6">
             <router-link
               to="/upz"
               class="nav-link"
@@ -52,7 +59,7 @@
               <span>Data UPZ</span>
             </router-link>
           </li>
-          <li v-if="canAccess(['admin', 'bidang1'])">
+          <li v-if="canAccess(['admin', 'bidang1'])" class="ml-6">
             <router-link
               to="/zis-transactions"
               class="nav-link"
@@ -63,44 +70,18 @@
             </router-link>
           </li>
 
-          <!-- Sharia Accounting Section -->
-          <li v-if="canAccess(['admin', 'bidang1'])">
-            <div class="nav-section">Akuntansi Syariah</div>
-            <router-link
-              to="/sharia-accounting"
-              class="nav-link"
-              :class="{ 'active': $route.name === 'ShariaAccounting' }"
-            >
-              <Calculator class="w-5 h-5" />
-              <span>Akuntansi Syariah</span>
-            </router-link>
-          </li>
-          <li v-if="canAccess(['admin', 'bidang1'])">
-            <router-link
-              to="/sharia-transactions"
-              class="nav-link"
-              :class="{ 'active': $route.name === 'ShariaTransactions' }"
-            >
-              <Database class="w-5 h-5" />
-              <span>Transaksi Syariah</span>
-            </router-link>
-          </li>
-          <li v-if="canAccess(['admin'])">
-            <router-link
-              to="/baznas-reports"
-              class="nav-link"
-              :class="{ 'active': $route.name === 'BaznasReports' }"
-            >
-              <FileCheck class="w-5 h-5" />
-              <span>Laporan BAZNAS</span>
-            </router-link>
-          </li>
-
-          <!-- Bidang 2 - Distribusi & Pemberdayaan -->
+          <!-- Bidang 2 - Distribusi -->
           <li v-if="canAccess(['admin', 'bidang2'])">
-            <div class="nav-section">Distribusi & Pemberdayaan</div>
+            <router-link
+              to="/distribusi"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'Distribusi' }"
+            >
+              <BarChart3 class="w-5 h-5" />
+              <span>Bidang 2 - Distribusi</span>
+            </router-link>
           </li>
-          <li v-if="canAccess(['admin', 'bidang2'])">
+          <li v-if="canAccess(['admin', 'bidang2'])" class="ml-6">
             <router-link
               to="/mustahiq"
               class="nav-link"
@@ -110,39 +91,128 @@
               <span>Data Mustahiq</span>
             </router-link>
           </li>
-          <li v-if="canAccess(['admin', 'bidang2'])">
+          <li v-if="canAccess(['admin', 'bidang2'])" class="ml-6">
             <router-link
               to="/programs"
               class="nav-link"
               :class="{ 'active': $route.name === 'Programs' }"
             >
               <Briefcase class="w-5 h-5" />
-              <span>Program Bantuan</span>
+              <span>Data Program Bantuan</span>
             </router-link>
           </li>
-          <li v-if="canAccess(['admin', 'bidang2'])">
+          <li v-if="canAccess(['admin', 'bidang2'])" class="ml-6">
             <router-link
               to="/distributions"
               class="nav-link"
               :class="{ 'active': $route.name === 'Distributions' }"
             >
               <Send class="w-5 h-5" />
-              <span>Distribusi</span>
+              <span>Data Realisasi Bantuan</span>
             </router-link>
           </li>
 
-          <!-- Bidang 4 - Arsip Surat -->
-          <li v-if="canAccess(['admin', 'bidang4'])">
-            <div class="nav-section">Arsip Surat</div>
-          </li>
-          <li v-if="canAccess(['admin', 'bidang4'])">
+          <!-- Bidang 3 - Keuangan -->
+          <li v-if="canAccess(['admin', 'bidang3'])">
             <router-link
-              to="/documents"
+              to="/keuangan"
               class="nav-link"
-              :class="{ 'active': $route.name === 'Documents' }"
+              :class="{ 'active': $route.name === 'Keuangan' }"
+            >
+              <BarChart3 class="w-5 h-5" />
+              <span>Bidang 3 - Keuangan</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang3'])" class="ml-6">
+            <router-link
+              to="/rkat"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'RKAT' }"
             >
               <FileText class="w-5 h-5" />
-              <span>Dokumen</span>
+              <span>Data RKAT</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang3'])" class="ml-6">
+            <router-link
+              to="/fund-receipts"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'FundReceipts' }"
+            >
+              <Download class="w-5 h-5" />
+              <span>Data Penerimaan Dana</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang3'])" class="ml-6">
+            <router-link
+              to="/fund-distributions"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'FundDistributions' }"
+            >
+              <Upload class="w-5 h-5" />
+              <span>Data Penyaluran Dana</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang3'])" class="ml-6">
+            <router-link
+              to="/spj"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'SPJ' }"
+            >
+              <FileCheck class="w-5 h-5" />
+              <span>Laporan SPJ</span>
+            </router-link>
+          </li>
+
+          <!-- Bidang 4 - SDM, Administrasi dan Umum -->
+          <li v-if="canAccess(['admin', 'bidang4'])">
+            <router-link
+              to="/sdm"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'SDM' }"
+            >
+              <BarChart3 class="w-5 h-5" />
+              <span>Bidang 4 - SDM & Administrasi</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang4'])" class="ml-6">
+            <router-link
+              to="/staff"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'Staff' }"
+            >
+              <Users class="w-5 h-5" />
+              <span>Staff Data</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang4'])" class="ml-6">
+            <router-link
+              to="/incoming-letters"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'IncomingLetters' }"
+            >
+              <Mail class="w-5 h-5" />
+              <span>Surat Masuk</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang4'])" class="ml-6">
+            <router-link
+              to="/outgoing-letters"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'OutgoingLetters' }"
+            >
+              <Send class="w-5 h-5" />
+              <span>Surat Keluar</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang4'])" class="ml-6">
+            <router-link
+              to="/assets"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'Assets' }"
+            >
+              <Box class="w-5 h-5" />
+              <span>Data Asset Kantor</span>
             </router-link>
           </li>
 
@@ -158,6 +228,26 @@
             >
               <BarChart3 class="w-5 h-5" />
               <span>Laporan</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin'])">
+            <router-link
+              to="/baznas-reports"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'BaznasReports' }"
+            >
+              <FileCheck class="w-5 h-5" />
+              <span>Laporan BAZNAS</span>
+            </router-link>
+          </li>
+          <li v-if="canAccess(['admin', 'bidang1'])">
+            <router-link
+              to="/ml-analytics"
+              class="nav-link"
+              :class="{ 'active': $route.name === 'MLAnalytics' }"
+            >
+              <BarChart3 class="w-5 h-5" />
+              <span>Analitik ML</span>
             </router-link>
           </li>
         </ul>
@@ -206,7 +296,11 @@ import {
   LogOut,
   Calculator,
   Database,
-  FileCheck
+  FileCheck,
+  Download,
+  Upload,
+  Mail,
+  Box
 } from 'lucide-vue-next'
 
 const router = useRouter()

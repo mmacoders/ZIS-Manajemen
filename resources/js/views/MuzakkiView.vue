@@ -150,6 +150,30 @@
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
+                  <Coins class="w-4 h-4 mr-2" />
+                  Gaji Pokok
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center">
+                  <Tag class="w-4 h-4 mr-2" />
+                  Jenis Zakat
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center">
+                  <CreditCard class="w-4 h-4 mr-2" />
+                  Nominal Setoran
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center">
+                  <Calendar class="w-4 h-4 mr-2" />
+                  Tanggal Setoran
+                </div>
+              </th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div class="flex items-center">
                   <Phone class="w-4 h-4 mr-2" />
                   Kontak
                 </div>
@@ -177,6 +201,20 @@
                 <span :class="getJenisClass(muzakki.jenis)">
                   {{ muzakki.jenis }}
                 </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatCurrency(muzakki.gaji_pokok) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span :class="getZakatTypeClass(muzakki.jenis_zakat)">
+                  {{ muzakki.jenis_zakat || '-' }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatCurrency(muzakki.nominal_setoran) }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ formatDate(muzakki.tanggal_setoran) }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 <div class="flex items-center space-y-1 flex-col">
@@ -383,6 +421,64 @@
                 </div>
               </div>
               
+              <!-- Zakat Information -->
+              <div class="sm:col-span-2">
+                <h4 class="text-base font-semibold text-gray-900 mb-4 mt-6">Informasi Zakat</h4>
+              </div>
+              
+              <div>
+                <label class="form-label">Gaji Pokok (Rp)</label>
+                <div class="relative">
+                  <Coins class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input v-model="form.gaji_pokok" type="number" step="0.01" min="0" class="form-input pl-10" placeholder="0.00" />
+                </div>
+              </div>
+              
+              <div>
+                <label class="form-label">Jenis Zakat</label>
+                <div class="relative">
+                  <Tag class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <select v-model="form.jenis_zakat" class="form-input pl-10">
+                    <option value="">Pilih jenis zakat</option>
+                    <option value="zakat penghasilan">Zakat Penghasilan</option>
+                    <option value="zakat mal">Zakat Mal</option>
+                    <option value="zakat fitrah">Zakat Fitrah</option>
+                    <option value="infaq">Infaq</option>
+                    <option value="sedekah">Sedekah</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="form-label">Nominal Setoran (Rp)</label>
+                <div class="relative">
+                  <CreditCard class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input v-model="form.nominal_setoran" type="number" step="0.01" min="0" class="form-input pl-10" placeholder="0.00" />
+                </div>
+              </div>
+              
+              <div>
+                <label class="form-label">Metode Pembayaran</label>
+                <div class="relative">
+                  <CreditCard class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <select v-model="form.metode_pembayaran" class="form-input pl-10">
+                    <option value="">Pilih metode pembayaran</option>
+                    <option value="tunai">Tunai</option>
+                    <option value="transfer bank">Transfer Bank</option>
+                    <option value="e-wallet">E-Wallet</option>
+                    <option value="lainnya">Lainnya</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label class="form-label">Tanggal Setoran</label>
+                <div class="relative">
+                  <Calendar class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input v-model="form.tanggal_setoran" type="date" class="form-input pl-10" />
+                </div>
+              </div>
+              
               <div>
                 <label class="form-label">Keterangan</label>
                 <div class="relative">
@@ -410,7 +506,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
-import { Search, Plus, Edit, Trash2, User, IdCard, MapPin, Phone, Mail, Building, FileText, Settings, X, Camera } from 'lucide-vue-next'
+import { 
+  Search, Plus, Edit, Trash2, User, IdCard, MapPin, Phone, Mail, 
+  Building, FileText, Settings, X, Camera, Coins, Tag, CreditCard, Calendar 
+} from 'lucide-vue-next'
 import OCRUpload from '../components/OCRUpload.vue'
 import type { OCRResult } from '../services/ocrService'
 
@@ -448,7 +547,12 @@ const form = ref({
   tempat_lahir: '',
   tanggal_lahir: '',
   jenis_kelamin: '',
-  pekerjaan: ''
+  pekerjaan: '',
+  gaji_pokok: '',
+  jenis_zakat: '',
+  nominal_setoran: '',
+  metode_pembayaran: '',
+  tanggal_setoran: ''
 })
 
 onMounted(() => {
@@ -519,7 +623,12 @@ const openModal = (muzakki = null) => {
       tempat_lahir: '',
       tanggal_lahir: '',
       jenis_kelamin: '',
-      pekerjaan: ''
+      pekerjaan: '',
+      gaji_pokok: '',
+      jenis_zakat: '',
+      nominal_setoran: '',
+      metode_pembayaran: '',
+      tanggal_setoran: ''
     }
   }
   showModal.value = true
@@ -600,6 +709,24 @@ const getJenisClass = (jenis: string) => {
     : `${baseClass} bg-green-100 text-green-800`
 }
 
+const getZakatTypeClass = (jenis: string) => {
+  const baseClass = 'px-2 py-1 text-xs font-medium rounded-full'
+  switch (jenis) {
+    case 'zakat penghasilan':
+      return `${baseClass} bg-purple-100 text-purple-800`
+    case 'zakat mal':
+      return `${baseClass} bg-indigo-100 text-indigo-800`
+    case 'zakat fitrah':
+      return `${baseClass} bg-teal-100 text-teal-800`
+    case 'infaq':
+      return `${baseClass} bg-yellow-100 text-yellow-800`
+    case 'sedekah':
+      return `${baseClass} bg-orange-100 text-orange-800`
+    default:
+      return `${baseClass} bg-gray-100 text-gray-800`
+  }
+}
+
 const getWhatsAppLink = (phoneNumber: string) => {
   if (!phoneNumber) return '#'
   
@@ -614,6 +741,19 @@ const getWhatsAppLink = (phoneNumber: string) => {
   }
   
   return `https://api.whatsapp.com/send?phone=${cleanNumber}`
+}
+
+const formatCurrency = (amount: number) => {
+  if (!amount) return '-'
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR'
+  }).format(amount)
+}
+
+const formatDate = (date: string) => {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('id-ID')
 }
 
 // OCR handling methods

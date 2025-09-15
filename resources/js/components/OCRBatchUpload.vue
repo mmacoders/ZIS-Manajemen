@@ -3,18 +3,18 @@
     <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
       <h3 class="text-lg font-semibold text-blue-900 mb-2">
         <Layers class="w-5 h-5 inline mr-2" />
-        Batch Document Processing
+        Pemrosesan Dokumen Batch
       </h3>
       <p class="text-sm text-blue-700">
-        Upload multiple documents for batch OCR processing. Supported formats: JPG, PNG, PDF (Max: 5MB each)
+        Unggah beberapa dokumen untuk pemrosesan OCR batch. Format yang didukung: JPG, PNG, PDF (Maks: 5MB per file)
       </p>
     </div>
 
     <!-- Template Selection -->
     <div class="mb-4">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Document Template (Optional)</label>
+      <label class="block text-sm font-medium text-gray-700 mb-2">Template Dokumen (Opsional)</label>
       <select v-model="selectedTemplate" class="form-select">
-        <option value="">Auto-detect document type</option>
+        <option value="">Deteksi otomatis jenis dokumen</option>
         <option v-for="template in documentTemplates" :key="template.name" :value="template.name">
           {{ template.name }}
         </option>
@@ -42,15 +42,15 @@
       <div class="flex flex-col items-center">
         <Upload class="w-16 h-16 text-gray-400 mb-4" />
         <h3 class="text-lg font-semibold text-gray-900 mb-2">
-          Upload Multiple Documents
+          Unggah Banyak Dokumen
         </h3>
         <p class="text-sm text-gray-600 mb-4 max-w-sm">
-          Select multiple files or drag and drop them here for batch OCR processing
+          Pilih beberapa file atau seret dan lepas di sini untuk pemrosesan OCR batch
         </p>
         <div class="flex flex-col sm:flex-row gap-2 text-xs sm:text-sm text-gray-500">
-          <span>• Click to select multiple files</span>
-          <span class="hidden sm:inline">or</span>
-          <span>• Drag & drop files here</span>
+          <span>• Klik untuk memilih beberapa file</span>
+          <span class="hidden sm:inline">atau</span>
+          <span>• Seret & lepas file di sini</span>
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@
     <div v-else class="space-y-4">
       <div class="flex items-center justify-between">
         <h4 class="text-base font-semibold text-gray-900">
-          Selected Files ({{ selectedFiles.length }})
+          File Terpilih ({{ selectedFiles.length }})
         </h4>
         <div class="flex gap-2">
           <button
@@ -67,14 +67,14 @@
             class="btn-secondary-sm"
           >
             <Plus class="w-4 h-4 mr-1" />
-            Add More
+            Tambah Lagi
           </button>
           <button
             @click="clearFiles"
             class="btn-outline-sm"
           >
             <X class="w-4 h-4 mr-1" />
-            Clear All
+            Hapus Semua
           </button>
         </div>
       </div>
@@ -97,15 +97,15 @@
             <div v-if="processingStatus[index]" class="flex items-center space-x-2">
               <div v-if="processingStatus[index] === 'processing'" class="flex items-center">
                 <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
-                <span class="text-xs text-blue-600">Processing...</span>
+                <span class="text-xs text-blue-600">Memproses...</span>
               </div>
               <div v-else-if="processingStatus[index] === 'success'" class="flex items-center">
                 <CheckCircle class="w-4 h-4 text-green-600 mr-1" />
-                <span class="text-xs text-green-600">Success</span>
+                <span class="text-xs text-green-600">Berhasil</span>
               </div>
               <div v-else-if="processingStatus[index] === 'error'" class="flex items-center">
                 <AlertCircle class="w-4 h-4 text-red-600 mr-1" />
-                <span class="text-xs text-red-600">Failed</span>
+                <span class="text-xs text-red-600">Gagal</span>
               </div>
             </div>
             
@@ -129,11 +129,11 @@
         >
           <div v-if="isProcessing" class="flex items-center">
             <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-            Processing {{ currentProcessing }}/{{ selectedFiles.length }}...
+            Memproses {{ currentProcessing }}/{{ selectedFiles.length }}...
           </div>
           <span v-else>
             <Zap class="w-4 h-4 mr-2" />
-            Process {{ selectedFiles.length }} Files
+            Proses {{ selectedFiles.length }} File
           </span>
         </button>
       </div>
@@ -142,7 +142,7 @@
     <!-- Processing Progress -->
     <div v-if="isProcessing" class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium text-blue-900">Batch Processing Progress</span>
+        <span class="text-sm font-medium text-blue-900">Progres Pemrosesan Batch</span>
         <span class="text-sm text-blue-700">{{ Math.round((currentProcessing / selectedFiles.length) * 100) }}%</span>
       </div>
       
@@ -154,7 +154,7 @@
       </div>
       
       <div class="text-xs text-blue-700">
-        Currently processing: {{ currentFileName }}
+        Sedang memproses: {{ currentFileName }}
       </div>
     </div>
 
@@ -167,7 +167,7 @@
             <CheckCircle class="w-8 h-8 text-green-600 mr-3" />
             <div>
               <p class="text-lg font-bold text-green-900">{{ batchResults.successCount }}</p>
-              <p class="text-sm text-green-700">Successful</p>
+              <p class="text-sm text-green-700">Berhasil</p>
             </div>
           </div>
         </div>
@@ -177,7 +177,7 @@
             <AlertCircle class="w-8 h-8 text-red-600 mr-3" />
             <div>
               <p class="text-lg font-bold text-red-900">{{ batchResults.failedCount }}</p>
-              <p class="text-sm text-red-700">Failed</p>
+              <p class="text-sm text-red-700">Gagal</p>
             </div>
           </div>
         </div>
@@ -187,7 +187,7 @@
             <FileText class="w-8 h-8 text-blue-600 mr-3" />
             <div>
               <p class="text-lg font-bold text-blue-900">{{ batchResults.totalProcessed }}</p>
-              <p class="text-sm text-blue-700">Total Processed</p>
+              <p class="text-sm text-blue-700">Total Diproses</p>
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@
           class="flex-1 btn-primary"
         >
           <Download class="w-4 h-4 mr-2" />
-          Apply {{ batchResults.successCount }} Successful Results
+          Terapkan {{ batchResults.successCount }} Hasil Berhasil
         </button>
         
         <button
@@ -209,7 +209,7 @@
           class="flex-1 sm:flex-none btn-secondary"
         >
           <FileText class="w-4 h-4 mr-2" />
-          Export Results
+          Ekspor Hasil
         </button>
         
         <button
@@ -223,7 +223,7 @@
 
       <!-- Failed Files Details -->
       <div v-if="batchResults.failed.length > 0" class="bg-red-50 border border-red-200 rounded-lg p-4">
-        <h5 class="text-sm font-medium text-red-900 mb-2">Failed Files ({{ batchResults.failed.length }})</h5>
+        <h5 class="text-sm font-medium text-red-900 mb-2">File Gagal ({{ batchResults.failed.length }})</h5>
         <div class="space-y-2">
           <div v-for="(failure, index) in batchResults.failed" :key="index" class="text-xs">
             <span class="font-medium text-red-800">{{ failure.file.name }}:</span>

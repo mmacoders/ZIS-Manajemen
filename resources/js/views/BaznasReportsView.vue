@@ -69,7 +69,7 @@
                 <p class="font-medium text-gray-900">{{ formatCurrency(report.total_dana || 0) }}</p>
               </div>
               <div>
-                <p class="text-gray-600">Compliance Score</p>
+                <p class="text-gray-600">Skor Kepatuhan</p>
                 <p class="font-medium text-gray-900">{{ report.compliance_score || 0 }}%</p>
               </div>
               <div>

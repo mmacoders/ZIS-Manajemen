@@ -14,6 +14,16 @@ use App\Http\Controllers\Api\OCRController;
 use App\Http\Controllers\Api\ShariaAccountingController;
 use App\Http\Controllers\Api\BaznasReportController;
 use App\Http\Controllers\Api\MLAnalyticsController;
+// Bidang 3 Controllers
+use App\Http\Controllers\Api\RkatController;
+use App\Http\Controllers\Api\FundReceiptController;
+use App\Http\Controllers\Api\FundDistributionController;
+use App\Http\Controllers\Api\SpjController;
+// Bidang 4 Controllers
+use App\Http\Controllers\Api\StaffController;
+use App\Http\Controllers\Api\IncomingLetterController;
+use App\Http\Controllers\Api\OutgoingLetterController;
+use App\Http\Controllers\Api\AssetController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -25,7 +35,6 @@ Route::prefix('ml-analytics')->group(function () {
     Route::get('donation-predictions', [MLAnalyticsController::class, 'donationPredictions']);
     Route::get('donor-analysis', [MLAnalyticsController::class, 'donorAnalysis']);
     Route::get('beneficiary-predictions', [MLAnalyticsController::class, 'beneficiaryPredictions']);
-    Route::get('fraud-detection', [MLAnalyticsController::class, 'fraudDetection']);
     Route::post('trigger-fraud-detection', [MLAnalyticsController::class, 'triggerFraudDetection']); // AI Analysis endpoint
     Route::get('performance-metrics', [MLAnalyticsController::class, 'performanceMetrics']);
     Route::get('prediction-history', [MLAnalyticsController::class, 'predictionHistory']);
@@ -61,8 +70,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('reports/distributions', [DistributionController::class, 'report']);
     });
     
-    // Bidang 4 - Arsip Surat routes
+    // Bidang 3 - Keuangan routes
+    Route::middleware('check.role:admin,bidang3')->group(function () {
+        Route::apiResource('rkat', RkatController::class);
+        Route::apiResource('fund-receipts', FundReceiptController::class);
+        Route::apiResource('fund-distributions', FundDistributionController::class);
+        Route::apiResource('spj', SpjController::class);
+    });
+    
+    // Bidang 4 - Administrasi routes
     Route::middleware('check.role:admin,bidang4')->group(function () {
+        Route::apiResource('staff', StaffController::class);
+        Route::apiResource('incoming-letters', IncomingLetterController::class);
+        Route::apiResource('outgoing-letters', OutgoingLetterController::class);
+        Route::apiResource('assets', AssetController::class);
         Route::apiResource('documents', DocumentController::class);
         Route::get('documents-search', [DocumentController::class, 'search']);
         Route::get('documents/{id}/download', [DocumentController::class, 'download']);

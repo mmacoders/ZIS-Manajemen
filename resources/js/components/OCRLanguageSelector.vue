@@ -3,13 +3,13 @@
     <div class="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
       <h4 class="text-sm font-semibold text-purple-900 mb-2 flex items-center">
         <Globe class="w-4 h-4 mr-2" />
-        OCR Language Settings
+        Pengaturan Bahasa OCR
       </h4>
       
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <!-- Language Selection -->
         <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Primary Language</label>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Bahasa Utama</label>
           <select 
             v-model="selectedLanguage" 
             @change="handleLanguageChange"
@@ -27,7 +27,7 @@
 
         <!-- Auto-detection Toggle -->
         <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">Processing Mode</label>
+          <label class="block text-xs font-medium text-gray-700 mb-1">Mode Pemrosesan</label>
           <div class="flex items-center">
             <label class="flex items-center">
               <input
@@ -36,7 +36,7 @@
                 @change="handleAutoDetectChange"
                 class="form-checkbox h-3 w-3 text-purple-600"
               />
-              <span class="ml-2 text-xs text-gray-700">Auto-detect language</span>
+              <span class="ml-2 text-xs text-gray-700">Deteksi otomatis bahasa</span>
             </label>
           </div>
         </div>
@@ -63,7 +63,7 @@
 
       <!-- Multi-language Selection for Auto-detect -->
       <div v-if="autoDetect" class="mt-3 p-2 bg-blue-50 border border-blue-200 rounded">
-        <h5 class="text-xs font-semibold text-blue-900 mb-1">Languages for Auto-detection</h5>
+        <h5 class="text-xs font-semibold text-blue-900 mb-1">Bahasa untuk Deteksi Otomatis</h5>
         <div class="flex flex-wrap gap-1">
           <label 
             v-for="language in availableLanguages" 

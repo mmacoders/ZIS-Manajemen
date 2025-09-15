@@ -19,7 +19,18 @@ class Muzakki extends Model
         'telepon',
         'email',
         'jenis',
-        'keterangan'
+        'keterangan',
+        'gaji_pokok',
+        'jenis_zakat',
+        'nominal_setoran',
+        'metode_pembayaran',
+        'tanggal_setoran'
+    ];
+
+    protected $casts = [
+        'gaji_pokok' => 'decimal:2',
+        'nominal_setoran' => 'decimal:2',
+        'tanggal_setoran' => 'date'
     ];
 
     public function zisTransactions()

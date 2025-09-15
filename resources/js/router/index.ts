@@ -20,23 +20,12 @@ const router = createRouter({
       component: () => import('@/views/DashboardView.vue'),
       meta: { requiresAuth: true }
     },
+    // Bidang 1 - Collection Routes
     {
       path: '/pengumpulan',
       name: 'Pengumpulan',
       component: () => import('@/views/PengumpulanView.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'bidang1'] }
-    },
-    {
-      path: '/distribusi',
-      name: 'Distribusi',
-      component: () => import('@/views/DistribusiView.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'bidang2'] }
-    },
-    {
-      path: '/arsip',
-      name: 'Arsip',
-      component: () => import('@/views/ArsipView.vue'),
-      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
     },
     {
       path: '/muzakki',
@@ -56,6 +45,13 @@ const router = createRouter({
       component: () => import('@/views/ZisTransactionsView.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'bidang1'] }
     },
+    // Bidang 2 - Distribution Routes
+    {
+      path: '/distribusi',
+      name: 'Distribusi',
+      component: () => import('@/views/DistribusiView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang2'] }
+    },
     {
       path: '/mustahiq',
       name: 'Mustahiq',
@@ -74,12 +70,81 @@ const router = createRouter({
       component: () => import('@/views/DistributionsView.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'bidang2'] }
     },
+    // Bidang 3 - Financial Routes
+    {
+      path: '/keuangan',
+      name: 'Keuangan',
+      component: () => import('@/views/KeuanganView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang3'] }
+    },
+    {
+      path: '/rkat',
+      name: 'RKAT',
+      component: () => import('@/views/RkatView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang3'] }
+    },
+    {
+      path: '/fund-receipts',
+      name: 'FundReceipts',
+      component: () => import('@/views/FundReceiptView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang3'] }
+    },
+    {
+      path: '/fund-distributions',
+      name: 'FundDistributions',
+      component: () => import('@/views/FundDistributionView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang3'] }
+    },
+    {
+      path: '/spj',
+      name: 'SPJ',
+      component: () => import('@/views/SpjView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang3'] }
+    },
+    // Bidang 4 - Human Resources, Administration and General Routes
+    {
+      path: '/sdm',
+      name: 'SDM',
+      component: () => import('@/views/SdmView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
+    },
+    {
+      path: '/staff',
+      name: 'Staff',
+      component: () => import('@/views/StaffView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
+    },
+    {
+      path: '/incoming-letters',
+      name: 'IncomingLetters',
+      component: () => import('@/views/IncomingLetterView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
+    },
+    {
+      path: '/outgoing-letters',
+      name: 'OutgoingLetters',
+      component: () => import('@/views/OutgoingLetterView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
+    },
+    {
+      path: '/assets',
+      name: 'Assets',
+      component: () => import('@/views/AssetView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
+    },
+    {
+      path: '/arsip',
+      name: 'Arsip',
+      component: () => import('@/views/ArsipView.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
+    },
     {
       path: '/documents',
       name: 'Documents',
       component: () => import('@/views/DocumentsView.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'bidang4'] }
     },
+    // Other Routes
     {
       path: '/reports',
       name: 'Reports',

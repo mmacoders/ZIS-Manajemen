@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import axios from 'axios'
-
-const API_BASE_URL = 'http://localhost:8000/api'
-
-// Configure axios defaults
-axios.defaults.baseURL = API_BASE_URL
-axios.defaults.headers.common['Accept'] = 'application/json'
-axios.defaults.headers.common['Content-Type'] = 'application/json'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<any>(null)
@@ -16,14 +9,33 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value)
 
-  // Set token in axios headers
-  if (token.value) {
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+  // Function to set token in axios headers
+  const setAxiosToken = (tokenValue: string | null) => {
+    if (tokenValue) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${tokenValue}`
+    } else {
+      delete axios.defaults.headers.common['Authorization']
+    }
   }
+
+  // Set token in axios headers initially
+  setAxiosToken(token.value)
+
+  // Watch for token changes and update axios headers
+  watch(token, (newToken) => {
+    setAxiosToken(newToken)
+  })
 
   const login = async (credentials: { email: string; password: string }) => {
     try {
       isLoading.value = true
+      // Now that bootstrap.js is properly imported, axios should have the correct baseURL
+      console.log('Making login request with configured axios')
+      console.log('Axios config:', {
+        baseURL: axios.defaults.baseURL,
+        headers: axios.defaults.headers
+      })
+      
       const response = await axios.post('/login', credentials)
       
       token.value = response.data.token
@@ -32,10 +44,14 @@ export const useAuthStore = defineStore('auth', () => {
       if (token.value) {
         localStorage.setItem('token', token.value)
       }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
+      setAxiosToken(token.value)
       
       return response.data
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Login error:', error)
+      console.error('Error response:', error.response)
+      console.error('Error status:', error.response?.status)
+      console.error('Error data:', error.response?.data)
       throw error
     } finally {
       isLoading.value = false
@@ -53,7 +69,7 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
       token.value = null
       localStorage.removeItem('token')
-      delete axios.defaults.headers.common['Authorization']
+      setAxiosToken(null)
     }
   }
 

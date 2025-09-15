@@ -16,6 +16,12 @@ return new class extends Migration
             $table->string('pic_nama');
             $table->string('pic_telepon');
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
+            // Additional fields for form completeness requirements
+            $table->date('tanggal_setoran')->nullable();
+            $table->decimal('jumlah_setoran', 15, 2)->nullable();
+            $table->string('bukti_transfer')->nullable();
+            $table->enum('jenis_setoran', ['zakat', 'infaq', 'sedekah'])->nullable();
+            $table->enum('validasi', ['pending', 'verified', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

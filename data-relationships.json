@@ -1,0 +1,276 @@
+{
+  "data_structure": {
+    "Bidang1_Pengumpulan": {
+      "description": "Collection Data (Muzakki, UPZ, ZIS Transactions)",
+      "entities": {
+        "Muzakki": {
+          "fields": [
+            "id_muzakki",
+            "nama",
+            "alamat",
+            "no_telp",
+            "gaji_pokok",
+            "jenis_zakat",
+            "nominal_setoran",
+            "metode_pembayaran",
+            "tgl_setoran"
+          ],
+          "relations": {
+            "hasMany": ["ZISTransaksi"],
+            "belongsTo": []
+          }
+        },
+        "UPZ": {
+          "fields": [
+            "id_upz",
+            "nama_upz",
+            "alamat",
+            "tgl_setoran",
+            "jumlah_setoran",
+            "jenis_setoran",
+            "bukti_transfer",
+            "validasi"
+          ],
+          "relations": {
+            "hasMany": ["ZISTransaksi"],
+            "belongsTo": []
+          }
+        },
+        "ZISTransaksi": {
+          "fields": [
+            "id_transaksi",
+            "id_muzakki",
+            "id_upz",
+            "jenis_zis",
+            "jumlah",
+            "metode_pembayaran",
+            "status_verifikasi",
+            "tanggal"
+          ],
+          "relations": {
+            "belongsTo": ["Muzakki", "UPZ"],
+            "hasOne": ["Penerimaan"]
+          }
+        }
+      }
+    },
+    "Bidang2_Distribusi": {
+      "description": "Distribution Data (Mustahiq, Programs, Realization)",
+      "entities": {
+        "Mustahiq": {
+          "fields": [
+            "id_mustahiq",
+            "nama",
+            "nik",
+            "alamat",
+            "kontak",
+            "kategori_asnaf",
+            "jenis_bantuan",
+            "status_verifikasi"
+          ],
+          "relations": {
+            "hasMany": ["Realisasi"],
+            "belongsTo": []
+          }
+        },
+        "Program": {
+          "fields": [
+            "id_program",
+            "nama_program",
+            "jenis_program",
+            "bidang_program",
+            "anggaran_dialokasikan",
+            "tgl_pelaksanaan",
+            "penanggung_jawab"
+          ],
+          "relations": {
+            "hasMany": ["Realisasi", "RKAT", "Penyaluran", "Staff", "SuratMasuk", "SuratKeluar"],
+            "belongsTo": []
+          }
+        },
+        "Realisasi": {
+          "fields": [
+            "id_realisasi",
+            "id_mustahiq",
+            "id_program",
+            "jenis_bantuan",
+            "nominal",
+            "bukti_penyaluran",
+            "tgl_realisasi"
+          ],
+          "relations": {
+            "belongsTo": ["Mustahiq", "Program"],
+            "hasOne": ["Penyaluran"]
+          }
+        }
+      }
+    },
+    "Bidang3_Keuangan": {
+      "description": "Financial Data (RKAT, Receipts, Distributions, SPJ)",
+      "entities": {
+        "RKAT": {
+          "fields": [
+            "id_rkat",
+            "bidang",
+            "nama_program",
+            "jenis_kegiatan",
+            "volume",
+            "unit_cost",
+            "total_anggaran",
+            "tahun",
+            "status"
+          ],
+          "relations": {
+            "belongsTo": ["Program"],
+            "hasMany": ["Aset"]
+          }
+        },
+        "Penerimaan": {
+          "fields": [
+            "id_penerimaan",
+            "tgl_setor",
+            "sumber_dana",
+            "jumlah_setor",
+            "jenis_dana",
+            "status"
+          ],
+          "relations": {
+            "belongsTo": ["ZISTransaksi"],
+            "hasOne": ["Penyaluran"]
+          }
+        },
+        "Penyaluran": {
+          "fields": [
+            "id_penyaluran",
+            "id_program",
+            "nama_program",
+            "bidang_program",
+            "anggaran_dialokasikan",
+            "nominal_bantuan",
+            "bukti_penyaluran"
+          ],
+          "relations": {
+            "belongsTo": ["Penerimaan", "Program", "Realisasi"],
+            "hasOne": ["SPJ"]
+          }
+        },
+        "SPJ": {
+          "fields": [
+            "id_spj",
+            "no_spj",
+            "nama_penerima",
+            "nama_program",
+            "nominal",
+            "tgl_spj",
+            "status_validasi"
+          ],
+          "relations": {
+            "belongsTo": ["Penyaluran"]
+          }
+        }
+      }
+    },
+    "Bidang4_Administrasi": {
+      "description": "Administration Data (Staff, Letters, Assets)",
+      "entities": {
+        "Staff": {
+          "fields": [
+            "id_staff",
+            "nama",
+            "jabatan",
+            "bidang",
+            "periode"
+          ],
+          "relations": {
+            "belongsTo": ["Program"]
+          }
+        },
+        "SuratMasuk": {
+          "fields": [
+            "id_surat_masuk",
+            "nomor_agenda",
+            "tanggal",
+            "asal_surat",
+            "perihal",
+            "upload_dokumen"
+          ],
+          "relations": {
+            "belongsTo": ["Program"]
+          }
+        },
+        "SuratKeluar": {
+          "fields": [
+            "id_surat_keluar",
+            "tanggal",
+            "tujuan",
+            "perihal",
+            "upload_dokumen"
+          ],
+          "relations": {
+            "belongsTo": ["Program"]
+          }
+        },
+        "Aset": {
+          "fields": [
+            "id_aset",
+            "nama",
+            "kode",
+            "tahun_pengadaan",
+            "kondisi",
+            "lokasi"
+          ],
+          "relations": {
+            "belongsTo": ["RKAT"]
+          }
+        }
+      }
+    }
+  },
+  "cross_field_relationships": {
+    "ZISTransaksi_to_Penerimaan": {
+      "description": "ZIS transactions lead to fund receipts",
+      "from": "Bidang1_Pengumpulan.ZISTransaksi",
+      "to": "Bidang3_Keuangan.Penerimaan"
+    },
+    "Penerimaan_to_Penyaluran": {
+      "description": "Fund receipts enable fund distributions",
+      "from": "Bidang3_Keuangan.Penerimaan",
+      "to": "Bidang3_Keuangan.Penyaluran"
+    },
+    "Realisasi_to_Penyaluran": {
+      "description": "Assistance realization leads to fund distribution",
+      "from": "Bidang2_Distribusi.Realisasi",
+      "to": "Bidang3_Keuangan.Penyaluran"
+    },
+    "Penyaluran_to_SPJ": {
+      "description": "Fund distributions require SPJ documentation",
+      "from": "Bidang3_Keuangan.Penyaluran",
+      "to": "Bidang3_Keuangan.SPJ"
+    },
+    "Program_to_RKAT": {
+      "description": "Programs are planned in RKAT",
+      "from": "Bidang2_Distribusi.Program",
+      "to": "Bidang3_Keuangan.RKAT"
+    },
+    "Program_to_Staff": {
+      "description": "Programs are managed by staff",
+      "from": "Bidang2_Distribusi.Program",
+      "to": "Bidang4_Administrasi.Staff"
+    },
+    "Program_to_SuratMasuk": {
+      "description": "Programs may be related to incoming letters",
+      "from": "Bidang2_Distribusi.Program",
+      "to": "Bidang4_Administrasi.SuratMasuk"
+    },
+    "Program_to_SuratKeluar": {
+      "description": "Programs may be related to outgoing letters",
+      "from": "Bidang2_Distribusi.Program",
+      "to": "Bidang4_Administrasi.SuratKeluar"
+    },
+    "RKAT_to_Aset": {
+      "description": "RKAT planning includes asset procurement",
+      "from": "Bidang3_Keuangan.RKAT",
+      "to": "Bidang4_Administrasi.Aset"
+    }
+  }
+}

@@ -176,7 +176,7 @@ export class OCRService {
     // Indonesian Language Configuration
     this.languageConfigs.set('ind', {
       code: 'ind',
-      name: 'Indonesian',
+      name: 'Bahasa Indonesia',
       tesseractCode: 'ind+eng',
       direction: 'ltr',
       patterns: {
@@ -196,7 +196,7 @@ export class OCRService {
     // Arabic Language Configuration
     this.languageConfigs.set('ara', {
       code: 'ara',
-      name: 'Arabic',
+      name: 'Bahasa Arab',
       tesseractCode: 'ara+eng',
       direction: 'rtl',
       patterns: {
@@ -216,7 +216,7 @@ export class OCRService {
     // English Language Configuration
     this.languageConfigs.set('eng', {
       code: 'eng',
-      name: 'English',
+      name: 'Bahasa Inggris',
       tesseractCode: 'eng',
       direction: 'ltr',
       patterns: {

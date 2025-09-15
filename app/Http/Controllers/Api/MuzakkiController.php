@@ -80,7 +80,12 @@ class MuzakkiController extends Controller
                 'telepon' => 'nullable|string|max:20|regex:/^[0-9+\-\s]+$/',
                 'email' => 'nullable|email|max:255',
                 'jenis' => 'required|in:individu,perusahaan',
-                'keterangan' => 'nullable|string|max:1000'
+                'keterangan' => 'nullable|string|max:1000',
+                'gaji_pokok' => 'nullable|numeric|min:0',
+                'jenis_zakat' => 'nullable|in:zakat penghasilan,zakat mal,zakat fitrah,infaq,sedekah',
+                'nominal_setoran' => 'nullable|numeric|min:0',
+                'metode_pembayaran' => 'nullable|in:tunai,transfer bank,e-wallet,lainnya',
+                'tanggal_setoran' => 'nullable|date'
             ]);
 
             $muzakki = Muzakki::create($request->all());
@@ -106,8 +111,18 @@ class MuzakkiController extends Controller
 
     public function show($id)
     {
-        $muzakki = Muzakki::with('zisTransactions')->findOrFail($id);
-        return response()->json($muzakki);
+        try {
+            $muzakki = Muzakki::with('zisTransactions')->findOrFail($id);
+            return response()->json([
+                'success' => true,
+                'data' => $muzakki
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Muzakki tidak ditemukan'
+            ], 404);
+        }
     }
 
     public function update(Request $request, $id)
@@ -122,7 +137,12 @@ class MuzakkiController extends Controller
                 'telepon' => 'nullable|string|max:20|regex:/^[0-9+\-\s]+$/',
                 'email' => 'nullable|email|max:255',
                 'jenis' => 'required|in:individu,perusahaan',
-                'keterangan' => 'nullable|string|max:1000'
+                'keterangan' => 'nullable|string|max:1000',
+                'gaji_pokok' => 'nullable|numeric|min:0',
+                'jenis_zakat' => 'nullable|in:zakat penghasilan,zakat mal,zakat fitrah,infaq,sedekah',
+                'nominal_setoran' => 'nullable|numeric|min:0',
+                'metode_pembayaran' => 'nullable|in:tunai,transfer bank,e-wallet,lainnya',
+                'tanggal_setoran' => 'nullable|date'
             ]);
 
             $muzakki->update($request->all());
@@ -187,28 +207,23 @@ class MuzakkiController extends Controller
     {
         try {
             $query = Muzakki::query();
-
-            if ($request->nama) {
-                $query->where('nama', 'like', '%' . $request->nama . '%');
+            
+            if ($request->q) {
+                $q = $request->q;
+                $query->where(function($qBuilder) use ($q) {
+                    $qBuilder->where('nama', 'like', '%' . $q . '%')
+                             ->orWhere('nik', 'like', '%' . $q . '%')
+                             ->orWhere('alamat', 'like', '%' . $q . '%')
+                             ->orWhere('telepon', 'like', '%' . $q . '%')
+                             ->orWhere('email', 'like', '%' . $q . '%');
+                });
             }
-
-            if ($request->nik) {
-                $query->where('nik', 'like', '%' . $request->nik . '%');
-            }
-
-            if ($request->jenis) {
-                $query->where('jenis', $request->jenis);
-            }
-
-            if ($request->alamat) {
-                $query->where('alamat', 'like', '%' . $request->alamat . '%');
-            }
-
-            $results = $query->with('zisTransactions')->paginate(20);
-
+            
+            $muzakki = $query->limit(10)->get(['id', 'nama', 'nik', 'alamat']);
+            
             return response()->json([
                 'success' => true,
-                'data' => $results
+                'data' => $muzakki
             ]);
         } catch (\Exception $e) {
             return response()->json([

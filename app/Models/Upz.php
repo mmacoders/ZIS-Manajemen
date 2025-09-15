@@ -17,7 +17,17 @@ class Upz extends Model
         'alamat',
         'pic_nama',
         'pic_telepon',
-        'status'
+        'status',
+        'tanggal_setoran',
+        'jumlah_setoran',
+        'bukti_transfer',
+        'jenis_setoran',
+        'validasi'
+    ];
+
+    protected $casts = [
+        'tanggal_setoran' => 'date',
+        'jumlah_setoran' => 'decimal:2'
     ];
 
     public function zisTransactions()
