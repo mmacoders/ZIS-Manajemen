@@ -6,12 +6,12 @@
     </div>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <router-link to="/muzakki" class="card hover:shadow-md transition-shadow">
+      <router-link to="/donatur" class="card hover:shadow-md transition-shadow">
         <div class="flex items-center">
           <Users class="w-8 h-8 text-blue-600 mr-4" />
           <div>
-            <h3 class="font-semibold text-gray-900">Data Muzakki</h3>
-            <p class="text-sm text-gray-600">Kelola data pemberi zakat</p>
+            <h3 class="font-semibold text-gray-900">Data Donatur</h3>
+            <p class="text-sm text-gray-600">Kelola data donatur individu dan lembaga</p>
           </div>
         </div>
       </router-link>

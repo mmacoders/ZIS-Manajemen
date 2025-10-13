@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class BaznasReport extends Model
@@ -13,10 +11,9 @@ class BaznasReport extends Model
     use HasFactory;
 
     protected $fillable = [
-        'report_code',
         'report_type',
-        'report_period',
         'report_year',
+        'report_period',
         'period_start',
         'period_end',
         'total_collection',
@@ -27,19 +24,17 @@ class BaznasReport extends Model
         'total_distribution',
         'asnaf_distribution',
         'geographical_distribution',
-        'program_distribution',
         'collection_sources',
+        'compliance_metrics',
         'opening_balance',
         'closing_balance',
-        'compliance_metrics',
         'executive_summary',
         'recommendations',
         'status',
-        'file_path',
         'submitted_at',
-        'prepared_by',
         'approved_by',
-        'approved_at'
+        'approved_at',
+        'created_by'
     ];
 
     protected $casts = [
@@ -51,48 +46,36 @@ class BaznasReport extends Model
         'total_sedekah' => 'decimal:2',
         'total_amil' => 'decimal:2',
         'total_distribution' => 'decimal:2',
-        'opening_balance' => 'decimal:2',
-        'closing_balance' => 'decimal:2',
         'asnaf_distribution' => 'array',
         'geographical_distribution' => 'array',
-        'program_distribution' => 'array',
         'collection_sources' => 'array',
         'compliance_metrics' => 'array',
+        'opening_balance' => 'decimal:2',
+        'closing_balance' => 'decimal:2',
         'submitted_at' => 'datetime',
         'approved_at' => 'datetime'
     ];
 
     /**
-     * Relationship to Preparer
+     * Relationship to creator
      */
-    public function preparer(): BelongsTo
+    public function creator()
     {
-        return $this->belongsTo(User::class, 'prepared_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
-     * Relationship to Approver
+     * Relationship to approver
      */
-    public function approver(): BelongsTo
+    public function approver()
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
     /**
-     * Generate report code
+     * Generate report data
      */
-    public static function generateReportCode(string $type, int $year, string $period): string
-    {
-        $typeCode = strtoupper(substr($type, 0, 1)); // M, Q, A for monthly, quarterly, annual
-        $periodCode = strtoupper(substr($period, 0, 3));
-        
-        return "BZN{$typeCode}{$year}{$periodCode}";
-    }
-
-    /**
-     * Calculate and populate report data
-     */
-    public function calculateReportData(): void
+    public function generateReportData(): void
     {
         $startDate = $this->period_start;
         $endDate = $this->period_end;
@@ -101,7 +84,7 @@ class BaznasReport extends Model
         $transactions = ShariaTransaction::byDateRange($startDate, $endDate)
             ->posted()
             ->baznasCompliant()
-            ->with(['fundCategory', 'muzakki', 'mustahiq'])
+            ->with(['fundCategory', 'donatur', 'mustahiq'])
             ->get();
 
         // Calculate collections by fund type
@@ -148,10 +131,10 @@ class BaznasReport extends Model
         // Calculate collection sources
         $collectionSources = [
             'individual' => $transactions->where('transaction_type', 'collection')
-                ->whereHas('muzakki', fn($q) => $q->where('jenis', 'individu'))
+                ->whereHas('donatur', fn($q) => $q->where('jenis', 'individu'))
                 ->sum('amount'),
             'corporate' => $transactions->where('transaction_type', 'collection')
-                ->whereHas('muzakki', fn($q) => $q->where('jenis', 'perusahaan'))
+                ->whereHas('donatur', fn($q) => $q->where('jenis', 'perusahaan'))
                 ->sum('amount')
         ];
         $this->collection_sources = $collectionSources;
@@ -169,8 +152,8 @@ class BaznasReport extends Model
             'amil_percentage' => round($totalAmilPercentage, 2),
             'distribution_efficiency' => round($distributionEfficiency, 2),
             'baznas_compliance_rate' => 100, // All included transactions are compliant
-            'total_muzakki' => $transactions->where('transaction_type', 'collection')
-                ->distinct('muzakki_id')->count('muzakki_id'),
+            'total_donatur' => $transactions->where('transaction_type', 'collection')
+                ->distinct('donatur_id')->count('donatur_id'),
             'total_mustahiq' => $transactions->where('transaction_type', 'distribution')
                 ->distinct('mustahiq_id')->count('mustahiq_id')
         ];
@@ -216,7 +199,7 @@ class BaznasReport extends Model
         $summary .= "3. Amil: Rp " . number_format($this->total_amil, 0, ',', '.') . "\n";
         $summary .= "   - Persentase Amil: {$metrics['amil_percentage']}% (Standar BAZNAS: ≤12.5%)\n\n";
         
-        $summary .= "4. Jumlah Muzakki: {$metrics['total_muzakki']} orang\n";
+        $summary .= "4. Jumlah Donatur: {$metrics['total_donatur']} orang\n";
         $summary .= "5. Jumlah Mustahiq: {$metrics['total_mustahiq']} orang\n\n";
         
         $summary .= "6. Tingkat Kepatuhan BAZNAS: {$metrics['baznas_compliance_rate']}%";
@@ -301,30 +284,23 @@ class BaznasReport extends Model
             'submitted_at' => now()
         ]);
         
+        // In a real implementation, this would send the report to BAZNAS
+        // For now, we'll just update the status
+        
         return true;
     }
 
     /**
-     * Scope by status
+     * Get report as PDF
      */
-    public function scopeByStatus($query, string $status)
+    public function generatePdf()
     {
-        return $query->where('status', $status);
-    }
-
-    /**
-     * Scope by year
-     */
-    public function scopeByYear($query, int $year)
-    {
-        return $query->where('report_year', $year);
-    }
-
-    /**
-     * Scope by type
-     */
-    public function scopeByType($query, string $type)
-    {
-        return $query->where('report_type', $type);
+        // This would generate a PDF report
+        // Implementation would depend on your PDF generation library
+        // For example, using Barryvdh\DomPDF\Facades\Pdf
+        
+        // return Pdf::loadView('pdf.baznas-report', ['report' => $this])
+        //     ->setPaper('a4', 'portrait')
+        //     ->download('baznas-report-' . $this->id . '.pdf');
     }
 }

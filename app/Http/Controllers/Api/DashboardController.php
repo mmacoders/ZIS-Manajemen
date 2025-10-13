@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ZisTransaction;
 use App\Models\Distribution;
 use App\Models\Document;
-use App\Models\Muzakki;
+use App\Models\Donatur;
 use App\Models\Mustahiq;
 use App\Models\Program;
 use App\Models\Upz;
@@ -32,7 +32,7 @@ class DashboardController extends Controller
     private function getSummary()
     {
         return [
-            'total_muzakki' => Muzakki::count(),
+            'total_donatur' => Donatur::count(),
             'total_upz' => Upz::where('status', 'aktif')->count(),
             'total_mustahiq' => Mustahiq::where('status', 'aktif')->count(),
             'total_programs' => Program::where('status', 'aktif')->count(),
@@ -46,7 +46,7 @@ class DashboardController extends Controller
 
     private function getRecentTransactions()
     {
-        return ZisTransaction::with(['muzakki', 'upz'])
+        return ZisTransaction::with(['donatur', 'upz'])
             ->latest()
             ->take(5)
             ->get();
@@ -95,16 +95,16 @@ class DashboardController extends Controller
             ->groupBy('kategori')
             ->get();
 
-        // Top Muzakki (last 12 months)
-        $topMuzakki = ZisTransaction::where('status', 'verified')
+        // Top Donatur (last 12 months)
+        $topDonatur = ZisTransaction::where('status', 'verified')
             ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
-            ->with('muzakki')
+            ->with('donatur')
             ->selectRaw('
-                muzakki_id,
+                donatur_id,
                 SUM(jumlah) as total_contribution,
                 COUNT(*) as total_transactions
             ')
-            ->groupBy('muzakki_id')
+            ->groupBy('donatur_id')
             ->orderBy('total_contribution', 'desc')
             ->limit(10)
             ->get();
@@ -114,7 +114,7 @@ class DashboardController extends Controller
             'monthly_distribution' => $monthlyDistribution,
             'zis_by_type' => $zisByType,
             'mustahiq_by_category' => $mustahiqByCategory,
-            'top_muzakki' => $topMuzakki,
+            'top_donatur' => $topDonatur,
         ];
     }
 

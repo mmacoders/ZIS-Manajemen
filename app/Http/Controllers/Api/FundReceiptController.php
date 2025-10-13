@@ -11,7 +11,7 @@ class FundReceiptController extends Controller
 {
     public function index(Request $request)
     {
-        $query = FundReceipt::with(['muzakki', 'upz']);
+        $query = FundReceipt::with(['donatur', 'upz']);
         
         if ($request->search) {
             $query->where(function($q) use ($request) {
@@ -45,7 +45,7 @@ class FundReceiptController extends Controller
             'sumber_dana' => 'required|string|max:255',
             'jumlah_setor' => 'required|numeric|min:0',
             'jenis_dana' => 'required|string|max:100',
-            'muzakki_id' => 'nullable|exists:muzakki,id',
+            'donatur_id' => 'nullable|exists:donatur,id',
             'upz_id' => 'nullable|exists:upz,id',
             'keterangan' => 'nullable|string',
             'bukti_transfer' => 'nullable|string'
@@ -55,12 +55,12 @@ class FundReceiptController extends Controller
         $data['nomor_bukti'] = 'FR-' . date('Ymd') . '-' . Str::random(6);
         
         $fundReceipt = FundReceipt::create($data);
-        return response()->json($fundReceipt->load(['muzakki', 'upz']), 201);
+        return response()->json($fundReceipt->load(['donatur', 'upz']), 201);
     }
 
     public function show($id)
     {
-        $fundReceipt = FundReceipt::with(['muzakki', 'upz'])->findOrFail($id);
+        $fundReceipt = FundReceipt::with(['donatur', 'upz'])->findOrFail($id);
         return response()->json($fundReceipt);
     }
 
@@ -74,14 +74,14 @@ class FundReceiptController extends Controller
             'sumber_dana' => 'required|string|max:255',
             'jumlah_setor' => 'required|numeric|min:0',
             'jenis_dana' => 'required|string|max:100',
-            'muzakki_id' => 'nullable|exists:muzakki,id',
+            'donatur_id' => 'nullable|exists:donatur,id',
             'upz_id' => 'nullable|exists:upz,id',
             'keterangan' => 'nullable|string',
             'bukti_transfer' => 'nullable|string'
         ]);
 
         $fundReceipt->update($request->all());
-        return response()->json($fundReceipt->load(['muzakki', 'upz']));
+        return response()->json($fundReceipt->load(['donatur', 'upz']));
     }
 
     public function destroy($id)

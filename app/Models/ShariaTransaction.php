@@ -22,7 +22,7 @@ class ShariaTransaction extends Model
         'amil_amount',
         'reference_type',
         'reference_id',
-        'muzakki_id',
+        'donatur_id',
         'mustahiq_id',
         'mustahiq_category',
         'description',
@@ -69,11 +69,11 @@ class ShariaTransaction extends Model
     }
 
     /**
-     * Relationship to Muzakki
+     * Relationship to Donatur
      */
-    public function muzakki(): BelongsTo
+    public function donatur(): BelongsTo
     {
-        return $this->belongsTo(Muzakki::class, 'muzakki_id');
+        return $this->belongsTo(Donatur::class, 'donatur_id');
     }
 
     /**
@@ -199,48 +199,32 @@ class ShariaTransaction extends Model
         // Check amil percentage
         if ($this->amil_amount > ($this->amount * 0.125)) {
             $compliance['is_compliant'] = false;
-            $compliance['issues'][] = 'Amil percentage exceeds BAZNAS standard (12.5%)';
+            $compliance['issues'][] = 'Amil amount exceeds 12.5% limit';
         }
 
-        // Check fund category compliance
-        if (!$this->fundCategory->isBaznasCompliant()) {
+        // Check transaction type consistency
+        if ($this->transaction_type === 'collection' && $this->mustahiq_id) {
             $compliance['is_compliant'] = false;
-            $compliance['issues'][] = 'Fund category is not BAZNAS compliant';
+            $compliance['issues'][] = 'Collection transaction should not have mustahiq';
         }
 
-        // Check mustahiq category for distribution
-        if ($this->transaction_type === 'distribution' && !in_array($this->mustahiq_category, [
-            'fakir', 'miskin', 'amil', 'muallaf', 'riqab', 'gharim', 'fisabilillah', 'ibnu_sabil'
-        ])) {
+        if ($this->transaction_type === 'distribution' && $this->donatur_id) {
             $compliance['is_compliant'] = false;
-            $compliance['issues'][] = 'Invalid mustahiq category for distribution';
+            $compliance['issues'][] = 'Distribution transaction should not have donatur';
         }
+
+        // Check for required references
+        if (!$this->reference_type || !$this->reference_id) {
+            $compliance['is_compliant'] = false;
+            $compliance['issues'][] = 'Missing transaction reference';
+        }
+
+        $this->update([
+            'is_baznas_compliant' => $compliance['is_compliant'],
+            'compliance_data' => $compliance
+        ]);
 
         return $compliance;
-    }
-
-    /**
-     * Scope for approved transactions
-     */
-    public function scopeApproved($query)
-    {
-        return $query->where('status', 'approved');
-    }
-
-    /**
-     * Scope for posted transactions
-     */
-    public function scopePosted($query)
-    {
-        return $query->where('status', 'posted');
-    }
-
-    /**
-     * Scope by transaction type
-     */
-    public function scopeByType($query, string $type)
-    {
-        return $query->where('transaction_type', $type);
     }
 
     /**
@@ -252,10 +236,10 @@ class ShariaTransaction extends Model
     }
 
     /**
-     * Scope BAZNAS compliant transactions
+     * Scope by transaction type
      */
-    public function scopeBaznasCompliant($query)
+    public function scopeByType($query, $type)
     {
-        return $query->where('is_baznas_compliant', true);
+        return $query->where('transaction_type', $type);
     }
 }

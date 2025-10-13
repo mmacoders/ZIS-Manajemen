@@ -80,14 +80,25 @@ class UpzController extends Controller
             'validasi' => 'required|in:pending,verified,rejected'
         ]);
 
-        $upz->update($request->all());
-        return response()->json($upz);
+        $upz = Upz::create($request->all());
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Data UPZ berhasil disimpan',
+            'data'    => $upz
+        ], 201);
+        #$upz->update($request->all());
+        #return response()->json($upz);
     }
 
     public function destroy($id)
     {
         $upz = Upz::findOrFail($id);
         $upz->delete();
-        return response()->json(['message' => 'UPZ deleted successfully']);
+        
+    return response()->json([
+        'success' => true,
+        'message' => 'Data UPZ berhasil dihapus'
+    ], 200);
     }
 }

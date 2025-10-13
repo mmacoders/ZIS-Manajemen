@@ -74,13 +74,13 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kode Aset</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Aset</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai (Rp)</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kondisi</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Kode Aset</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Nama Aset</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Tahun</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Nilai (Rp)</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Kondisi</th>
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
@@ -98,23 +98,23 @@
             </tr>
             
             <tr v-else v-for="asset in assets" :key="asset.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ asset.kode_aset }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">
+              <td class="px-6 py-4 text-sm lg:text-base font-medium text-gray-900 asset-id">{{ asset.kode_aset }}</td>
+              <td class="px-6 py-4 text-sm lg:text-base text-gray-900">
                 <div class="max-w-xs truncate" :title="asset.nama_aset">
                   {{ asset.nama_aset }}
                 </div>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ asset.tahun_pengadaan }}</td>
-              <td class="px-6 py-4 text-sm text-gray-900">{{ asset.lokasi }}</td>
-              <td class="px-6 py-4 text-sm font-medium text-gray-900">
+              <td class="px-6 py-4 text-sm lg:text-base text-gray-900">{{ asset.tahun_pengadaan }}</td>
+              <td class="px-6 py-4 text-sm lg:text-base text-gray-900">{{ asset.lokasi }}</td>
+              <td class="px-6 py-4 text-sm lg:text-base font-medium text-gray-900">
                 {{ asset.nilai_aset ? formatCurrency(asset.nilai_aset) : '-' }}
               </td>
-              <td class="px-6 py-4 text-sm">
+              <td class="px-6 py-4 text-sm lg:text-base">
                 <span :class="getConditionClass(asset.kondisi)" class="inline-flex px-2 py-1 text-xs font-medium rounded-full">
                   {{ getConditionText(asset.kondisi) }}
                 </span>
               </td>
-              <td class="px-6 py-4 text-sm font-medium space-x-2">
+              <td class="px-6 py-4 text-sm lg:text-base font-medium space-x-2">
                 <button 
                   @click="openModal(asset)"
                   class="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
@@ -138,26 +138,26 @@
       <!-- Pagination -->
       <div v-if="pagination.last_page > 1" class="px-6 py-4 border-t border-gray-200">
         <div class="flex items-center justify-between">
-          <div class="text-sm text-gray-700">
+          <div class="text-sm lg:text-base text-gray-700">
             Menampilkan {{ pagination.from }} sampai {{ pagination.to }} dari {{ pagination.total }} aset
           </div>
           <div class="flex items-center space-x-2">
             <button
               @click="changePage(pagination.current_page - 1)"
               :disabled="pagination.current_page <= 1"
-              class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-2 text-sm lg:text-base bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Sebelumnya
             </button>
             
-            <span class="px-3 py-2 text-sm text-gray-700">
+            <span class="px-3 py-2 text-sm lg:text-base text-gray-700">
               Halaman {{ pagination.current_page }} dari {{ pagination.last_page }}
             </span>
             
             <button
               @click="changePage(pagination.current_page + 1)"
               :disabled="pagination.current_page >= pagination.last_page"
-              class="px-3 py-2 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-3 py-2 text-sm lg:text-base bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Selanjutnya
             </button>

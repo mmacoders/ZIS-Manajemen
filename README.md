@@ -16,7 +16,7 @@
 - Icons dengan Lucide Vue
 
 ### Database: MySQL
-- Tables: roles, users, muzakki, upz, zis_transactions, mustahiq, programs, distributions, documents
+- Tables: roles, users, donatur, upz, zis_transactions, mustahiq, programs, distributions, documents
 
 ## 🚀 Instalasi dan Setup
 
@@ -102,9 +102,9 @@ Setelah menjalankan seeder, gunakan akun berikut untuk login:
 
 ### 🏠 Dashboard
 - Summary total ZIS terkumpul dan terdistribusi
-- Statistik muzakki dan mustahiq
+- Statistik donatur dan mustahiq
 - Aktivitas terbaru (transaksi dan distribusi)
-- **Interactive Charts**: Monthly trends, ZIS types distribution, mustahiq categories, top muzakki
+- **Interactive Charts**: Monthly trends, ZIS types distribution, mustahiq categories, top donatur
 - **Real-time Updates**: Live notifications untuk transaksi baru dan distribusi selesai
 - **Visual Analytics**: Chart.js integration dengan responsive design
 
@@ -145,7 +145,7 @@ Setelah menjalankan seeder, gunakan akun berikut untuk login:
   - Performance analytics dengan trend tracking
 
 #### 📱 **Core OCR Capabilities**
-#### 1. **Muzakki (Donor) Registration** ⭐⭐⭐
+#### 1. **Donatur Registration** ⭐⭐⭐
 - **Scan ID Cards (KTP/Passport)**: Auto-fill data personal secara otomatis
 - **Enhanced Identity Extraction**: NIK, nama, alamat, tempat/tanggal lahir, gender, agama
 - **Smart Pattern Recognition**: Khusus untuk dokumen Indonesia dengan akurasi tinggi
@@ -196,7 +196,7 @@ Setelah menjalankan seeder, gunakan akun berikut untuk login:
   - **Balance Tracking**: Monitor saldo real-time setiap akun
   - **BAZNAS Mapping**: Mapping akun untuk keperluan laporan BAZNAS
 ### 📊 Modul Pengumpulan (Bidang 1)
-- **Data Muzakki**: Kelola pemberi zakat (individu/perusahaan) dengan search dan filter
+- **Data Donatur**: Kelola pemberi zakat (individu/perusahaan) dengan search dan filter
   - **WhatsApp Integration**: Direct contact via WhatsApp Web/App
   - **International Format**: Automatic phone number conversion (+62)
   - **Contact Enhancement**: Clickable email links and WhatsApp buttons
@@ -235,7 +235,7 @@ Setelah menjalankan seeder, gunakan akun berikut untuk login:
   - **Export Options**: CSV and PDF export with applied filters
   - **Summary Cards**: Key metrics with effectiveness calculations and growth indicators
 - **PDF Reports**: Professional PDF export with branded templates
-  - **Multiple Report Types**: ZIS transactions, distributions, muzakki data, summary reports
+  - **Multiple Report Types**: ZIS transactions, distributions, donatur data, summary reports
   - **Professional Layout**: Branded PDF templates with proper formatting and statistics
 - **Real-time Notifications**: Toast notifications for live updates
   - **WebSocket Integration**: Pusher-based real-time communication
@@ -247,7 +247,7 @@ Setelah menjalankan seeder, gunakan akun berikut untuk login:
 ### Core Tables
 - `roles` - Roles sistem (admin, bidang1, bidang2, bidang4)
 - `users` - User dengan role assignment
-- `muzakki` - Data pemberi zakat
+- `donatur` - Data pemberi zakat
 - `upz` - Unit Pengumpul Zakat
 - `zis_transactions` - Transaksi ZIS masuk
 - `mustahiq` - Data penerima zakat (8 asnaf)
@@ -318,21 +318,21 @@ zis-frontend/         # Vue.js Frontend (Legacy Standalone)
 - [x] Authentication dan authorization
 - [x] Database design dan migrations
 - [x] Dashboard dengan summary
-- [x] Basic CRUD untuk Muzakki
+- [x] Basic CRUD untuk Donatur
 - [x] Sistem role-based access control (Admin, Bidang 1, Bidang 2, Bidang 4)
-- [x] UI/UX improvements untuk MuzakkiView dengan responsive modals
+- [x] UI/UX improvements untuk DonaturView dengan responsive modals
 - [x] Icon integration menggunakan Lucide Vue Next
 - [x] Tailwind CSS v3 configuration dan PostCSS setup
 - [x] Laravel Sanctum authentication dengan personal_access_tokens table
-- [x] Database seeder dengan 15 contoh data Muzakki realistis
+- [x] Database seeder dengan 15 contoh data Donatur realistis
 - [x] Fix migration duplicate table errors
 - [x] Modal scroll bug fixes dan responsive design
 - [x] Table structure improvements dengan separated name/address columns
-- [x] Complete CRUD untuk semua modul (Muzakki, UPZ, ZIS Transactions, Mustahiq, Programs, Distributions, Documents)
-- [x] Advanced search dan filtering untuk Muzakki dan Documents
+- [x] Complete CRUD untuk semua modul (Donatur, UPZ, ZIS Transactions, Mustahiq, Programs, Distributions, Documents)
+- [x] Advanced search dan filtering untuk Donatur dan Documents
 - [x] Data validation dan error handling dengan try-catch blocks
 - [x] File upload untuk dokumen dengan validasi file size dan type
-- [x] CSV export functionality untuk reports (ZIS, Distribution, Muzakki)
+- [x] CSV export functionality untuk reports (ZIS, Distribution, Donatur)
 - [x] Report summary dengan statistik dan analytics
 - [x] Audit logs system untuk tracking semua perubahan data
 - [x] Email notifications untuk transaksi ZIS baru
@@ -357,7 +357,7 @@ zis-frontend/         # Vue.js Frontend (Legacy Standalone)
 - [x] **Advanced Reporting Module**: Comprehensive reporting with filters and visualizations
 - [x] **Event Broadcasting**: Laravel event system for real-time updates
 - [x] **Toast Notifications**: User-friendly notification system
-- [x] **Dashboard Charts**: Monthly trends, ZIS types, mustahiq categories, top muzakki
+- [x] **Dashboard Charts**: Monthly trends, ZIS types, mustahiq categories, top donatur
 - [x] **Advanced OCR features**: ✅ **COMPLETED**
 - [x] **Batch document processing** - Multiple files OCR processing
 - [x] **OCR API endpoints for external integration** - REST API for third-party integration
@@ -365,7 +365,7 @@ zis-frontend/         # Vue.js Frontend (Legacy Standalone)
 - [x] **OCR accuracy improvement with machine learning** - Validation rules and learning algorithms
 
 ### 📋 Planned
-- [ ] Mobile app (Flutter) untuk muzakki
+- [ ] Mobile app (Flutter) untuk donatur
 - [ ] Docker containerization untuk deployment
 - [ ] CI/CD pipeline dengan GitHub Actions
 - [ ] Multi-language support (Indonesian/English)

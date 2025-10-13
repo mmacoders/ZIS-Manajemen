@@ -1,11 +1,11 @@
 {
   "data_structure": {
     "Bidang1_Pengumpulan": {
-      "description": "Collection Data (Muzakki, UPZ, ZIS Transactions)",
+      "description": "Collection Data (Donatur, UPZ, ZIS Transactions)",
       "entities": {
-        "Muzakki": {
+        "Donatur": {
           "fields": [
-            "id_muzakki",
+            "id_donatur",
             "nama",
             "alamat",
             "no_telp",
@@ -39,7 +39,7 @@
         "ZISTransaksi": {
           "fields": [
             "id_transaksi",
-            "id_muzakki",
+            "id_donatur",
             "id_upz",
             "jenis_zis",
             "jumlah",
@@ -48,7 +48,7 @@
             "tanggal"
           ],
           "relations": {
-            "belongsTo": ["Muzakki", "UPZ"],
+            "belongsTo": ["Donatur", "UPZ"],
             "hasOne": ["Penerimaan"]
           }
         }

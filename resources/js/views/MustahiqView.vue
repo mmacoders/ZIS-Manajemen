@@ -147,43 +147,43 @@
         <table class="min-w-full divide-y divide-gray-200">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <User class="w-4 h-4 mr-2" />
                   Nama
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <IdCard class="w-4 h-4 mr-2" />
                   NIK
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <MapPin class="w-4 h-4 mr-2" />
                   Alamat
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <Tag class="w-4 h-4 mr-2" />
                   Kategori
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <Phone class="w-4 h-4 mr-2" />
                   Kontak
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <CheckCircle class="w-4 h-4 mr-2" />
                   Status
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th class="px-6 py-3 text-left text-xs lg:text-sm font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <Settings class="w-4 h-4 mr-2" />
                   Aksi
@@ -194,9 +194,9 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <tr v-for="mustahiq in mustahiqList" :key="mustahiq.id">
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ mustahiq.nama }}</div>
+                <div class="text-sm lg:text-base font-medium text-gray-900">{{ mustahiq.nama }}</div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-6 py-4 whitespace-nowrap text-sm lg:text-base text-gray-900">
                 {{ mustahiq.nik }}
               </td>
               <td class="px-6 py-4">
@@ -404,9 +404,23 @@ import { Search, Plus, Edit, Trash2, User, IdCard, MapPin, Phone, Tag, CheckCirc
 import OCRUpload from '../components/OCRUpload.vue'
 import type { OCRResult, MultiLanguageOCRResult } from '../services/ocrService'
 
-const mustahiqList = ref([])
+// Define interface for Mustahiq data
+interface Mustahiq {
+  id: number
+  nama: string
+  nik: string
+  alamat: string
+  telepon: string
+  kategori: string
+  keterangan: string
+  status: string
+  created_at?: string
+  updated_at?: string
+}
+
+const mustahiqList = ref<Mustahiq[]>([])
 const showModal = ref(false)
-const editingMustahiq = ref(null)
+const editingMustahiq = ref<Mustahiq | null>(null)
 const isLoading = ref(false)
 const searchName = ref('')
 const searchAddress = ref('')
@@ -427,7 +441,31 @@ const hasActiveFilters = computed(() => {
   return searchName.value || searchAddress.value || searchContact.value || filterKategori.value || filterStatus.value
 })
 
-const form = ref({
+interface MustahiqForm {
+  nama: string
+  nik: string
+  alamat: string
+  telepon: string
+  kategori: string
+  status: string
+  keterangan: string
+  // Additional fields for enhanced identity data
+  tempat_lahir: string
+  tanggal_lahir: string
+  jenis_kelamin: string
+  rt: string
+  rw: string
+  kelurahan: string
+  kecamatan: string
+  agama: string
+  status_perkawinan: string
+  pekerjaan: string
+  kewarganegaraan: string
+  provinsi: string
+  kota: string
+}
+
+const form = ref<MustahiqForm>({
   nama: '',
   nik: '',
   alamat: '',
@@ -522,10 +560,33 @@ const clearSearch = () => {
   fetchMustahiq(1)
 }
 
-const openModal = (mustahiq = null) => {
+const openModal = (mustahiq: Mustahiq | null = null) => {
   editingMustahiq.value = mustahiq
   if (mustahiq) {
-    form.value = { ...mustahiq }
+    // When editing, map the Mustahiq object to the form structure
+    form.value = {
+      nama: mustahiq.nama,
+      nik: mustahiq.nik,
+      alamat: mustahiq.alamat,
+      telepon: mustahiq.telepon || '',
+      kategori: mustahiq.kategori,
+      status: mustahiq.status,
+      keterangan: mustahiq.keterangan || '',
+      // Additional fields for enhanced identity data (not in Mustahiq model)
+      tempat_lahir: '',
+      tanggal_lahir: '',
+      jenis_kelamin: '',
+      rt: '',
+      rw: '',
+      kelurahan: '',
+      kecamatan: '',
+      agama: '',
+      status_perkawinan: '',
+      pekerjaan: '',
+      kewarganegaraan: '',
+      provinsi: '',
+      kota: ''
+    }
   } else {
     form.value = {
       nama: '',
@@ -679,7 +740,7 @@ const deleteMustahiq = async (id: number) => {
 }
 
 const getKategoriName = (kategori: string) => {
-  const names = {
+  const names: Record<string, string> = {
     'fakir': 'Fakir',
     'miskin': 'Miskin',
     'amil': 'Amil',
@@ -694,7 +755,7 @@ const getKategoriName = (kategori: string) => {
 
 const getKategoriClass = (kategori: string) => {
   const baseClass = 'px-2 py-1 text-xs font-medium rounded-full'
-  const colors = {
+  const colors: Record<string, string> = {
     'fakir': 'bg-red-100 text-red-800',
     'miskin': 'bg-orange-100 text-orange-800',
     'amil': 'bg-blue-100 text-blue-800',

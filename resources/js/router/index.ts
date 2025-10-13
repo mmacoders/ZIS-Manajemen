@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth.ts'
 
 const router = createRouter({
   history: createWebHistory('/'),
@@ -20,6 +20,44 @@ const router = createRouter({
       component: () => import('@/views/DashboardView.vue'),
       meta: { requiresAuth: true }
     },
+    // Wakil Bidang Routes
+    {
+      path: '/wakil1',
+      name: 'WakilBidang1',
+      component: () => import('@/views/WakilBidang1View.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'wakil1'] }
+    },
+    {
+      path: '/wakil2',
+      name: 'WakilBidang2',
+      component: () => import('@/views/WakilBidang2View.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'wakil2'] }
+    },
+    {
+      path: '/wakil3',
+      name: 'WakilBidang3',
+      component: () => import('@/views/WakilBidang3View.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'wakil3'] }
+    },
+    {
+      path: '/wakil4',
+      name: 'WakilBidang4',
+      component: () => import('@/views/WakilBidang4View.vue'),
+      meta: { requiresAuth: true, roles: ['admin', 'wakil4'] }
+    },
+    // Profile and Settings Routes
+    {
+      path: '/profile',
+      name: 'Profile',
+      component: () => import('@/views/ProfileView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/settings',
+      name: 'Settings',
+      component: () => import('@/views/SettingsView.vue'),
+      meta: { requiresAuth: true }
+    },
     // Bidang 1 - Collection Routes
     {
       path: '/pengumpulan',
@@ -28,9 +66,9 @@ const router = createRouter({
       meta: { requiresAuth: true, roles: ['admin', 'bidang1'] }
     },
     {
-      path: '/muzakki',
-      name: 'Muzakki',
-      component: () => import('@/views/MuzakkiView.vue'),
+      path: '/donatur',
+      name: 'Donatur',
+      component: () => import('@/views/DonaturView.vue'),
       meta: { requiresAuth: true, roles: ['admin', 'bidang1'] }
     },
     {
@@ -190,9 +228,30 @@ router.beforeEach(async (to, from, next) => {
     next('/login')
   } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
     next('/dashboard')
-  } else if (to.meta.roles) {
-    // Skip role check for now - will be implemented with proper typing later
-    next()
+  } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
+    // Check if user has required role
+    if (authStore.user && to.meta.roles.includes(authStore.user.role.name)) {
+      next()
+    } else {
+      // Redirect to appropriate dashboard based on role
+      const role = authStore.user?.role?.name
+      switch (role) {
+        case 'wakil1':
+          next('/wakil1')
+          break
+        case 'wakil2':
+          next('/wakil2')
+          break
+        case 'wakil3':
+          next('/wakil3')
+          break
+        case 'wakil4':
+          next('/wakil4')
+          break
+        default:
+          next('/dashboard')
+      }
+    }
   } else {
     next()
   }

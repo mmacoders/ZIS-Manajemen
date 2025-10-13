@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Muzakki;
+use App\Models\Donatur;
 use App\Models\ZisTransaction;
 use App\Models\Mustahiq;
 use App\Models\Distribution;
@@ -32,8 +32,8 @@ class CleanMLTestDataCommand extends Command
             $this->info('Deleting distributions...');
             Distribution::query()->delete();
             
-            $this->info('Deleting muzakkis...');
-            Muzakki::query()->delete();
+            $this->info('Deleting donaturs...');
+            Donatur::query()->delete();
             
             $this->info('Deleting mustahiqs...');
             Mustahiq::query()->delete();
@@ -43,7 +43,7 @@ class CleanMLTestDataCommand extends Command
             
             // Show final counts
             $this->info('Final counts:');
-            $this->info('Muzakki: ' . Muzakki::count());
+            $this->info('Donatur: ' . Donatur::count());
             $this->info('ZIS Transactions: ' . ZisTransaction::count());
             $this->info('Mustahiq: ' . Mustahiq::count());
             $this->info('Distributions: ' . Distribution::count());

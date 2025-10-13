@@ -12,7 +12,7 @@ class ZisTransaction extends Model
 
     protected $fillable = [
         'nomor_transaksi',
-        'muzakki_id',
+        'donatur_id',
         'upz_id',
         'jenis_zis',
         'jumlah',
@@ -30,9 +30,9 @@ class ZisTransaction extends Model
         'jumlah' => 'decimal:2'
     ];
 
-    public function muzakki()
+    public function donatur()
     {
-        return $this->belongsTo(Muzakki::class);
+        return $this->belongsTo(Donatur::class, 'donatur_id');
     }
 
     public function upz()

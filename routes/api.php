@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\MuzakkiController;
+use App\Http\Controllers\Api\DonaturController;
 use App\Http\Controllers\Api\UpzController;
 use App\Http\Controllers\Api\ZisTransactionController;
 use App\Http\Controllers\Api\MustahiqController;
@@ -24,6 +24,16 @@ use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\IncomingLetterController;
 use App\Http\Controllers\Api\OutgoingLetterController;
 use App\Http\Controllers\Api\AssetController;
+// Wakil Bidang Controllers
+use App\Http\Controllers\Api\WakilBidang1Controller;
+use App\Http\Controllers\Api\WakilBidang2Controller;
+use App\Http\Controllers\Api\WakilBidang3Controller;
+use App\Http\Controllers\Api\WakilBidang4Controller;
+// New Feature Controllers
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\ProgramStageController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\DocumentArchiveController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -52,10 +62,47 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
     
+    // Wakil Bidang I - Pengumpulan routes
+    Route::middleware('check.role:admin,wakil1')->group(function () {
+        Route::get('/wakil1/dashboard', [WakilBidang1Controller::class, 'dashboard']);
+    });
+    
+    // Wakil Bidang II - Distribusi routes
+    Route::middleware('check.role:admin,wakil2')->group(function () {
+        Route::get('/wakil2/dashboard', [WakilBidang2Controller::class, 'dashboard']);
+    });
+    
+    // Wakil Bidang III - Keuangan routes
+    Route::middleware('check.role:admin,wakil3')->group(function () {
+        Route::get('/wakil3/dashboard', [WakilBidang3Controller::class, 'dashboard']);
+    });
+    
+    // Wakil Bidang IV - SDM & SOP routes
+    Route::middleware('check.role:admin,wakil4')->group(function () {
+        Route::get('/wakil4/dashboard', [WakilBidang4Controller::class, 'dashboard']);
+    });
+    
+    // Comments routes
+    Route::apiResource('comments', CommentController::class);
+    
+    // Program stages routes
+    Route::apiResource('program-stages', ProgramStageController::class);
+    Route::post('program-stages/{program_stage}/lock', [ProgramStageController::class, 'lockStage']);
+    Route::post('program-stages/{program_stage}/unlock', [ProgramStageController::class, 'unlockStage']);
+    
+    // Notifications routes
+    Route::apiResource('notifications', NotificationController::class);
+    Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+    
+    // Document archives routes
+    Route::apiResource('document-archives', DocumentArchiveController::class);
+    Route::get('document-archives/{document_archive}/download', [DocumentArchiveController::class, 'download']);
+    
     // Bidang 1 - Pengumpulan routes
     Route::middleware('check.role:admin,bidang1')->group(function () {
-        Route::apiResource('muzakki', MuzakkiController::class);
-        Route::get('muzakki-search', [MuzakkiController::class, 'search']);
+        Route::apiResource('donatur', DonaturController::class);
+        Route::get('donatur-search', [DonaturController::class, 'search']);
         Route::apiResource('upz', UpzController::class);
         Route::apiResource('zis-transactions', ZisTransactionController::class);
         Route::post('zis-transactions/{id}/verify', [ZisTransactionController::class, 'verify']);

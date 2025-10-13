@@ -22,7 +22,7 @@ class ZisTransactionCreated implements ShouldBroadcast
      */
     public function __construct(ZisTransaction $transaction)
     {
-        $this->transaction = $transaction->load(['muzakki', 'upz']);
+        $this->transaction = $transaction->load(['donatur', 'upz']);
     }
 
     /**
@@ -45,12 +45,12 @@ class ZisTransactionCreated implements ShouldBroadcast
         return [
             'id' => $this->transaction->id,
             'nomor_transaksi' => $this->transaction->nomor_transaksi,
-            'muzakki_nama' => $this->transaction->muzakki->nama ?? 'Unknown',
+            'donatur_nama' => $this->transaction->donatur->nama ?? 'Unknown',
             'jenis_zis' => $this->transaction->jenis_zis,
             'jumlah' => $this->transaction->jumlah,
             'status' => $this->transaction->status,
             'tanggal_transaksi' => $this->transaction->tanggal_transaksi,
-            'message' => "Transaksi ZIS baru dari {$this->transaction->muzakki->nama} sebesar Rp " . number_format($this->transaction->jumlah, 0, ',', '.'),
+            'message' => "Transaksi ZIS baru dari {$this->transaction->donatur->nama} sebesar Rp " . number_format($this->transaction->jumlah, 0, ',', '.'),
             'type' => 'new_transaction',
             'timestamp' => now()->toISOString(),
         ];

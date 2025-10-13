@@ -16,7 +16,7 @@
             <input 
               v-model="filters.search"
               type="text" 
-              placeholder="No. transaksi, nama muzakki..."
+              placeholder="No. kwitansi, nama donatur..."
               class="form-input pl-10 w-full"
               @keyup.enter="() => fetchTransactions()"
             />
@@ -46,57 +46,56 @@
             </select>
           </div>
           
-          <!-- Date Range -->
+          <!-- Date -->
           <div class="relative">
             <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
             <Calendar class="absolute left-3 top-8 w-4 h-4 text-gray-400" />
             <input 
-              v-model="filters.date"
+              v-model="filters.date" 
               type="date" 
               class="form-input pl-10 w-full"
             />
           </div>
         </div>
         
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap items-center justify-between mt-4 pt-4 border-t border-gray-100">
-          <div class="flex flex-wrap items-center gap-2">
-            <button
-              @click="() => fetchTransactions()"
-              class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
-              title="Cari Data"
-            >
-              <Search class="w-4 h-4" />
-            </button>
-            
-            <button
-              v-if="hasActiveFilters"
-              @click="clearFilters"
-              class="inline-flex items-center px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
-              title="Reset Filter"
-            >
-              <X class="w-4 h-4" />
-            </button>
-          </div>
+        <div class="flex flex-wrap items-center gap-2 mt-4">
+          <button
+            @click="() => fetchTransactions()"
+            class="inline-flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            title="Cari Data"
+          >
+            <Search class="w-4 h-4" />
+          </button>
           
-          <div class="flex flex-wrap items-center gap-2">
-            <button 
-              @click="refreshData"
-              :disabled="isLoading"
-              class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-medium"
-            >
-              <RefreshCw :class="isLoading ? 'animate-spin' : ''" class="w-4 h-4 mr-2" />
-              Refresh
-            </button>
-            
-            <button 
-              @click="showCreateModal = true"
-              class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
-            >
-              <Plus class="w-4 h-4 mr-2" />
-              Tambah Transaksi
-            </button>
-          </div>
+          <button
+            v-if="hasActiveFilters"
+            @click="clearFilters"
+            class="inline-flex items-center px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-200"
+            title="Reset Filter"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <button 
+            @click="refreshData"
+            :disabled="isLoading"
+            class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-medium"
+          >
+            <RefreshCw :class="isLoading ? 'animate-spin' : ''" class="w-4 h-4 mr-2" />
+            Refresh
+          </button>
+          
+          <button 
+            @click="showCreateModal = true"
+            class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 font-medium"
+          >
+            <Plus class="w-4 h-4 mr-2" />
+            Tambah Transaksi
+          </button>
         </div>
       </div>
     </div>
@@ -110,13 +109,13 @@
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <Hash class="w-4 h-4 mr-2" />
-                  No. Transaksi
+                  No. Kwitansi
                 </div>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 <div class="flex items-center">
                   <User class="w-4 h-4 mr-2" />
-                  Muzakki
+                  Donatur
                 </div>
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -170,11 +169,12 @@
                 <div class="text-sm font-medium text-gray-900">{{ transaction.nomor_transaksi }}</div>
               </td>
               <td class="px-6 py-4">
-                <div class="text-sm text-gray-900 max-w-xs truncate" :title="transaction.muzakki?.nama">
-                  {{ transaction.muzakki?.nama || 'Unknown' }}
+                <div class="text-sm text-gray-900 max-w-xs truncate" :title="transaction.donatur?.nama">
+                  {{ transaction.donatur?.nama || 'Unknown' }}
                 </div>
-                <div v-if="transaction.muzakki" class="text-xs text-gray-500">
-                  NIK: {{ transaction.muzakki.nik || 'N/A' }}
+                <div v-if="transaction.donatur" class="text-xs text-gray-500">
+                  <span v-if="transaction.donatur.jenis_donatur === 'lembaga'">NPWP: {{ transaction.donatur.npwp || 'N/A' }}</span>
+                  <span v-else>NIK: {{ transaction.donatur.nik || 'N/A' }}</span>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -209,6 +209,13 @@
                   title="Edit"
                 >
                   <Edit class="w-4 h-4" />
+                </button>
+                <button 
+                  @click="deleteTransaction(transaction)"
+                  class="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                  title="Hapus"
+                >
+                  <Trash2 class="w-4 h-4" />
                 </button>
               </td>
             </tr>
@@ -259,181 +266,336 @@
               <X class="w-6 h-6" />
             </button>
           </div>
-          
-          <form @submit.prevent="submitForm">
-            <!-- Toggle OCR Button -->
-            <div v-if="showCreateModal" class="mb-6">
-              <button 
-                type="button"
-                @click="showOCRSection = !showOCRSection"
-                class="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Scan class="w-4 h-4 mr-2" />
-                {{ showOCRSection ? 'Sembunyikan OCR' : 'Scan Bukti Transfer' }}
-              </button>
-            </div>
-            
-            <!-- OCR Upload Section (Only for Create) -->
-            <div v-if="showCreateModal && showOCRSection" class="mb-6">
-              <OCRUpload 
-                v-model="ocrResult"
-                @dataExtracted="handleOCRData"
-                :showLanguageSelector="true"
-                :enableMultiLanguage="true"
-              />
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <!-- Transaction Number -->
-              <div class="sm:col-span-2">
-                <label class="form-label">No. Transaksi *</label>
-                <div class="relative">
-                  <Hash class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    v-model="form.nomor_transaksi"
-                    type="text" 
-                    required
-                    class="form-input pl-10"
-                    placeholder="Auto-generated jika kosong"
-                  />
-                </div>
-              </div>
-              
-              <!-- Transaction Date -->
-              <div>
-                <label class="form-label">Tanggal Transaksi *</label>
-                <div class="relative">
-                  <Calendar class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    v-model="form.tanggal_transaksi"
-                    type="date" 
-                    required
-                    class="form-input pl-10"
-                  />
-                </div>
-              </div>
-              
-              <!-- Muzakki Selection -->
-              <div>
-                <label class="form-label">Muzakki *</label>
-                <div class="relative">
-                  <User class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select 
-                    v-model="form.muzakki_id" 
-                    required 
-                    class="form-input pl-10"
-                    :disabled="muzakkiLoading"
-                  >
-                    <option value="">Pilih Muzakki</option>
-                    <option 
-                      v-for="muzakki in muzakkiList" 
-                      :key="muzakki.id" 
-                      :value="muzakki.id"
-                    >
-                      {{ muzakki.nama }} - {{ muzakki.nik }}
-                    </option>
-                  </select>
-                  <div v-if="muzakkiLoading" class="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+
+          <form @submit.prevent="saveTransaction">
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Transaksi *</label>
+                  <div class="relative">
+                    <Calendar class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                    <input 
+                      v-model="form.tanggal_transaksi" 
+                      type="date" 
+                      class="form-input pl-10 w-full"
+                      required
+                    />
                   </div>
                 </div>
-                <div class="mt-1 text-xs text-gray-500">
-                  Total muzakki: {{ muzakkiList.length }}
-                </div>
-                <button 
-                  type="button" 
-                  @click="fetchMuzakkiList"
-                  class="mt-1 text-xs text-blue-600 hover:text-blue-800"
-                >
-                  Refresh Daftar Muzakki
-                </button>
-              </div>
-              
-              <!-- ZIS Type -->
-              <div>
-                <label class="form-label">Jenis ZIS *</label>
-                <div class="relative">
-                  <Tag class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select v-model="form.jenis_zis" required class="form-input pl-10">
-                    <option value="">Pilih Jenis ZIS</option>
-                    <option value="zakat">Zakat</option>
-                    <option value="infaq">Infaq</option>
-                    <option value="sedekah">Sedekah</option>
-                  </select>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Transaksi</label>
+                  <div class="relative">
+                    <Tag class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                    <select 
+                      v-model="transactionType" 
+                      class="form-select pl-10 w-full"
+                      @change="handleTransactionTypeChange"
+                    >
+                      <option value="donation">Donasi (Donatur)</option>
+                      <option value="operational">Operasional</option>
+                    </select>
+                  </div>
                 </div>
               </div>
               
-              <!-- Amount -->
-              <div>
-                <label class="form-label">Jumlah (Rp) *</label>
+              <div v-if="transactionType === 'donation'">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Donatur *</label>
                 <div class="relative">
-                  <Coins class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    v-model.number="form.jumlah"
-                    type="number" 
+                  <User class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <select 
+                    v-model="form.donatur_id" 
+                    class="form-select pl-10 w-full"
                     required
-                    min="1000"
-                    step="1000"
-                    class="form-input pl-10"
-                    placeholder="Minimal Rp 1.000"
-                  />
-                </div>
-              </div>
-              
-              <!-- Payment Method -->
-              <div>
-                <label class="form-label">Metode Pembayaran</label>
-                <div class="relative">
-                  <CreditCard class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select v-model="form.metode_pembayaran" class="form-input pl-10">
-                    <option value="tunai">Tunai</option>
-                    <option value="transfer">Transfer Bank</option>
-                    <option value="ovo">OVO</option>
-                    <option value="gopay">GoPay</option>
-                    <option value="dana">DANA</option>
-                    <option value="shopee_pay">ShopeePay</option>
+                    :disabled="donaturLoading"
+                  >
+                    <option value="">Pilih Donatur</option>
+                    <option 
+                      v-for="donatur in donaturList" 
+                      :key="donatur.id" 
+                      :value="donatur.id"
+                    >
+                      {{ donatur.nama }} - 
+                      <span v-if="donatur.jenis_donatur === 'lembaga'">{{ donatur.npwp || 'NPWP tidak tersedia' }}</span>
+                      <span v-else>{{ donatur.nik || 'NIK tidak tersedia' }}</span>
+                    </option>
                   </select>
+                  <div v-if="donaturLoading" class="absolute right-3 top-3">
+                    <RefreshCw class="w-4 h-4 animate-spin text-gray-400" />
+                  </div>
                 </div>
               </div>
               
-              <!-- Reference Number -->
-              <div class="sm:col-span-2">
-                <label class="form-label">No. Referensi</label>
-                <div class="relative">
-                  <Hash class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input 
-                    v-model="form.no_referensi"
-                    type="text" 
-                    class="form-input pl-10"
-                    placeholder="No. transfer, no. kuitansi, dll"
-                  />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Jenis ZIS *</label>
+                  <div class="relative">
+                    <Tag class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                    <select v-model="form.jenis_zis" class="form-select pl-10 w-full" required>
+                      <option value="">Pilih Jenis</option>
+                      <option value="zakat">Zakat</option>
+                      <option value="infaq">Infaq</option>
+                      <option value="sedekah">Sedekah</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah (Rp) *</label>
+                  <div class="relative">
+                    <Coins class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                    <input 
+                      v-model="form.jumlah" 
+                      type="number" 
+                      class="form-input pl-10 w-full"
+                      required
+                      placeholder="100000"
+                    />
+                  </div>
                 </div>
               </div>
               
-              <!-- Notes -->
-              <div class="sm:col-span-2">
-                <label class="form-label">Keterangan</label>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
                 <div class="relative">
                   <FileText class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
                   <textarea 
-                    v-model="form.keterangan"
+                    v-model="form.keterangan" 
                     rows="3"
-                    class="form-input pl-10"
-                    placeholder="Catatan tambahan (opsional)"
+                    class="form-input pl-10 w-full"
+                    placeholder="Tambahkan catatan transaksi..."
                   ></textarea>
                 </div>
               </div>
+              
+              <div v-if="showEditModal && selectedTransaction">
+                <label class="block text-sm font-medium text-gray-700 mb-2">No. Kwitansi</label>
+                <div class="relative">
+                  <Hash class="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+                  <input 
+                    v-model="form.nomor_transaksi" 
+                    type="text" 
+                    class="form-input pl-10 w-full bg-gray-100"
+                    readonly
+                  />
+                </div>
+              </div>
             </div>
-            
-            <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-2 mt-6 pt-4 border-t border-gray-200">
-              <button type="button" @click="closeModal" class="btn btn-secondary w-full sm:w-auto">
+
+            <div class="flex justify-end space-x-2 mt-6 pt-4 border-t border-gray-200">
+              <button type="button" @click="closeModal" class="btn btn-secondary">
                 Batal
               </button>
-              <button type="submit" :disabled="isSubmitting" class="btn btn-primary w-full sm:w-auto">
-                {{ isSubmitting ? 'Menyimpan...' : (showCreateModal ? 'Simpan Transaksi' : 'Update Transaksi') }}
+              <button 
+                type="submit" 
+                :disabled="isSubmitting" 
+                class="btn btn-primary"
+              >
+                {{ isSubmitting ? 'Menyimpan...' : 'Simpan' }}
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transaction Detail Modal -->
+    <div v-if="showDetailModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4" @click="closeDetailModal">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" @click.stop>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold text-gray-900">Detail Transaksi</h3>
+            <button @click="closeDetailModal" class="text-gray-400 hover:text-gray-600">
+              <X class="w-6 h-6" />
+            </button>
+          </div>
+
+          <div v-if="selectedTransaction" class="space-y-6">
+            <!-- Receipt Header -->
+            <div class="text-center border-b pb-4">
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">KWITANSI</h2>
+              <p class="text-gray-600">No. {{ selectedTransaction.nomor_transaksi }}</p>
+              <p class="text-sm text-gray-500 mt-1">
+                {{ formatDate(selectedTransaction.tanggal_transaksi) }}
+              </p>
+            </div>
+
+            <!-- Donor Information -->
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h4 class="font-semibold text-gray-900 mb-3">Informasi Donatur</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <p class="text-sm text-gray-500">Nama</p>
+                  <p class="font-medium">{{ selectedTransaction.donatur?.nama || '-' }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500" v-if="selectedTransaction.donatur?.jenis_donatur === 'lembaga'">NPWP</p>
+                  <p class="text-sm text-gray-500" v-else>NIK</p>
+                  <p class="font-medium" v-if="selectedTransaction.donatur?.jenis_donatur === 'lembaga'">{{ selectedTransaction.donatur?.npwp || '-' }}</p>
+                  <p class="font-medium" v-else>{{ selectedTransaction.donatur?.nik || '-' }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Alamat</p>
+                  <p class="font-medium">{{ selectedTransaction.donatur?.alamat || '-' }}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-500">Telepon</p>
+                  <p class="font-medium">{{ selectedTransaction.donatur?.telepon || '-' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Transaction Details -->
+            <div class="border rounded-lg overflow-hidden">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ getZisTypeText(selectedTransaction.jenis_zis) }}
+                      </div>
+                      <div class="text-sm text-gray-500" v-if="selectedTransaction.keterangan">
+                        {{ selectedTransaction.keterangan }}
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                      {{ formatCurrency(selectedTransaction.jumlah) }}
+                    </td>
+                  </tr>
+                  <tr class="bg-gray-50 font-semibold">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Total</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">
+                      {{ formatCurrency(selectedTransaction.jumlah) }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Status and Verification -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-blue-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-2">Status</h4>
+                <div class="flex items-center">
+                  <span :class="getStatusBadgeClass(selectedTransaction.status)" 
+                        class="inline-flex px-3 py-1 text-sm font-medium rounded-full">
+                    {{ getStatusText(selectedTransaction.status) }}
+                  </span>
+                </div>
+              </div>
+              
+              <div v-if="selectedTransaction.status === 'verified' && selectedTransaction.verifier" class="bg-green-50 p-4 rounded-lg">
+                <h4 class="font-semibold text-gray-900 mb-2">Verifikasi</h4>
+                <p class="text-sm text-gray-700">
+                  Diverifikasi oleh {{ selectedTransaction.verifier.name }} pada 
+                  {{ formatDate(selectedTransaction.verified_at) }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-2 pt-4 border-t border-gray-200">
+              <button 
+                @click="printReceipt" 
+                class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
+              >
+                <Scan class="w-4 h-4 mr-2" />
+                Cetak Kwitansi
+              </button>
+              <button 
+                @click="editTransaction(selectedTransaction)" 
+                class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200"
+              >
+                <Edit class="w-4 h-4 mr-2" />
+                Edit
+              </button>
+              <button 
+                @click="deleteTransaction(selectedTransaction)" 
+                class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+              >
+                <Trash2 class="w-4 h-4 mr-2" />
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OCR Section -->
+    <div v-if="showOCRSection" class="mt-6">
+      <OCRUpload 
+        @ocr-success="handleOCRSuccess"
+        @close="showOCRSection = false"
+      />
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteConfirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4" @click="showDeleteConfirmModal = false">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-md" @click.stop>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Konfirmasi Hapus</h3>
+            <button @click="showDeleteConfirmModal = false" class="text-gray-400 hover:text-gray-600">
+              <X class="w-6 h-6" />
+            </button>
+          </div>
+
+          <div class="mb-6">
+            <p class="text-gray-700">
+              Apakah Anda yakin ingin menghapus transaksi dengan No. Kwitansi 
+              <span class="font-bold">{{ selectedTransaction?.nomor_transaksi }}</span>?
+            </p>
+          </div>
+
+          <div class="flex justify-end space-x-2">
+            <button 
+              @click="showDeleteConfirmModal = false" 
+              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              Batal
+            </button>
+            <button 
+              @click="confirmDeleteTransaction" 
+              class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              Hapus
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Success Modal -->
+    <div v-if="showDeleteSuccessModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4" @click="showDeleteSuccessModal = false">
+      <div class="bg-white rounded-lg shadow-xl w-full max-w-md" @click.stop>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-900">Berhasil</h3>
+            <button @click="showDeleteSuccessModal = false" class="text-gray-400 hover:text-gray-600">
+              <X class="w-6 h-6" />
+            </button>
+          </div>
+
+          <div class="mb-6 flex items-center">
+            <CheckCircle class="w-10 h-10 text-green-500 mr-3" />
+            <p class="text-gray-700">Transaksi berhasil dihapus.</p>
+          </div>
+
+          <div class="flex justify-end">
+            <button 
+              @click="showDeleteSuccessModal = false" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              OK
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -444,23 +606,26 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { 
   Plus, RefreshCw, Eye, Edit, Database, Scan,
-  Search, Tag, Calendar, Coins, Settings, Hash, User, CreditCard, FileText, X
+  Search, Tag, Calendar, Coins, Settings, Hash, User, CreditCard, FileText, X, Trash2, CheckCircle
 } from 'lucide-vue-next'
 import OCRUpload from '@/components/OCRUpload.vue'
-import type { OCRResult } from '@/services/ocrService'
 import axios from 'axios'
 
 // State
 const isLoading = ref(false)
 const isSubmitting = ref(false)
-const muzakkiLoading = ref(false)
+const donaturLoading = ref(false)
 const showOCRSection = ref(false)
 const transactions = ref<any[]>([])
-const muzakkiList = ref<any[]>([])
+const donaturList = ref<any[]>([])
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
+const showDetailModal = ref(false)
+const showDeleteConfirmModal = ref(false)
+const showDeleteSuccessModal = ref(false)
 const selectedTransaction = ref<any>(null)
-const ocrResult = ref<OCRResult | null>(null)
+const ocrResult = ref<any>(null)
+const transactionType = ref('donation') // 'donation' or 'operational'
 
 // Filters
 const filters = ref({
@@ -484,7 +649,7 @@ const pagination = ref({
 const form = ref({
   nomor_transaksi: '',
   tanggal_transaksi: new Date().toISOString().split('T')[0],
-  muzakki_id: '',
+  donatur_id: '',
   jenis_zis: '',
   jumlah: 0,
   metode_pembayaran: 'tunai',
@@ -498,7 +663,7 @@ const hasActiveFilters = computed(() => {
 })
 
 // Watchers
-watch([filters], () => {
+watch(filters, () => {
   pagination.value.current_page = 1
   fetchTransactions()
 }, { deep: true })
@@ -506,7 +671,7 @@ watch([filters], () => {
 // Lifecycle
 onMounted(() => {
   fetchTransactions()
-  fetchMuzakkiList()
+  fetchDonaturList()
 })
 
 // Methods
@@ -567,190 +732,78 @@ const fetchTransactions = async (page = 1) => {
     // Check if it's an authentication error
     if (error.response?.status === 401) {
       console.error('Authentication required to fetch transactions')
-      alert('Sesi Anda telah berakhir. Silakan login kembali.')
-      // You might want to redirect to login
-    } else if (error.response?.status === 403) {
-      console.error('Access forbidden - insufficient permissions')
-      alert('Anda tidak memiliki izin untuk mengakses data transaksi.')
-    } else if (error.response?.status === 404) {
-      console.error('API endpoint not found')
-      alert('Endpoint API tidak ditemukan. Silakan hubungi administrator.')
-    } else {
-      const errorMessage = error.response?.data?.message || error.message || 'Terjadi kesalahan saat memuat data transaksi'
-      alert('Gagal memuat data transaksi: ' + errorMessage)
     }
+    
     transactions.value = []
+    alert('Terjadi kesalahan saat memuat data transaksi')
   } finally {
     isLoading.value = false
   }
 }
 
-const fetchMuzakkiList = async () => {
+const handleTransactionTypeChange = () => {
+  // Clear donor selection when switching to operational
+  if (transactionType.value === 'operational') {
+    form.value.donatur_id = ''
+  }
+}
+
+const fetchDonaturList = async () => {
   try {
-    muzakkiLoading.value = true
-    // Use relative path since axios baseURL already includes /api
-    const response = await axios.get('/muzakki', {
-      params: {
-        per_page: 100 // Fetch more muzakki for the dropdown
-      }
-    })
-    
-    console.log('Muzakki API Response:', response)
-    
+    donaturLoading.value = true
+    const response = await axios.get('/donatur?per_page=100&include=npwp')
     if (response.data && response.data.success) {
-      // Handle paginated response from MuzakkiController
-      if (response.data.data && response.data.data.data) {
-        // Paginated response: data.data.data contains the actual muzakki records
-        muzakkiList.value = response.data.data.data || []
-      } else if (response.data.data) {
-        // Non-paginated response: data.data contains the muzakki records
-        muzakkiList.value = response.data.data || []
-      } else {
-        muzakkiList.value = []
-      }
-      
-      console.log('Muzakki List:', muzakkiList.value)
-      
-      // If no muzakki found, show a message
-      if (muzakkiList.value.length === 0) {
-        console.warn('No muzakki data found')
-      }
-    } else {
-      muzakkiList.value = []
-      const errorMessage = response.data?.message || 'Unknown error occurred'
-      console.error('Failed to fetch muzakki list:', errorMessage)
-      // Show user-friendly error message
-      alert('Gagal memuat data muzakki: ' + errorMessage)
+      donaturList.value = response.data.data.data || response.data.data || []
     }
-  } catch (error: any) {
-    console.error('Error fetching muzakki list:', error)
-    console.error('Error response:', error.response)
-    
-    // Check if it's an authentication error
-    if (error.response?.status === 401) {
-      console.error('Authentication required to fetch muzakki data')
-      alert('Sesi Anda telah berakhir. Silakan login kembali.')
-      // You might want to redirect to login
-    } else if (error.response?.status === 403) {
-      console.error('Access forbidden - insufficient permissions')
-      alert('Anda tidak memiliki izin untuk mengakses data muzakki.')
-    } else if (error.response?.status === 404) {
-      console.error('API endpoint not found')
-      alert('Endpoint API tidak ditemukan. Silakan hubungi administrator.')
-    } else {
-      const errorMessage = error.response?.data?.message || error.message || 'Terjadi kesalahan saat memuat data muzakki'
-      alert('Gagal memuat data muzakki: ' + errorMessage)
-    }
-    muzakkiList.value = []
+  } catch (error) {
+    console.error('Error fetching donatur list:', error)
   } finally {
-    muzakkiLoading.value = false
+    donaturLoading.value = false
   }
 }
 
-const handleOCRData = (extractedData: any) => {
-  console.log('Received OCR data:', extractedData)
-  
-  // Auto-populate form with OCR data
-  if (extractedData.amount) {
-    form.value.jumlah = extractedData.amount
-    console.log('Set Amount:', extractedData.amount)
-  }
-  
-  if (extractedData.date) {
-    form.value.tanggal_transaksi = extractedData.date
-    console.log('Set Date:', extractedData.date)
-  }
-  
-  if (extractedData.referenceNumber) {
-    form.value.no_referensi = extractedData.referenceNumber
-    console.log('Set Reference Number:', extractedData.referenceNumber)
-  }
-  
-  if (extractedData.bankName) {
-    form.value.metode_pembayaran = 'transfer'
-    console.log('Set Payment Method: transfer')
-  }
-  
-  // Auto-populate keterangan with extracted info
-  const notes = []
-  if (extractedData.donorName) notes.push(`Pengirim: ${extractedData.donorName}`)
-  if (extractedData.bankName) notes.push(`Bank: ${extractedData.bankName}`)
-  if (extractedData.accountNumber) notes.push(`Rekening: ${extractedData.accountNumber}`)
-  
-  if (notes.length > 0) {
-    form.value.keterangan = `OCR: ${notes.join(', ')}`
-    console.log('Set Keterangan:', form.value.keterangan)
-  }
-  
-  // Show success message
-  alert('Data berhasil diisi dari hasil OCR!')
-}
-
-const submitForm = async () => {
+const saveTransaction = async () => {
   try {
     isSubmitting.value = true
     
-    const method = showCreateModal.value ? 'POST' : 'PUT'
-    // Use relative paths since axios baseURL already includes /api
-    const url = showCreateModal.value 
-      ? '/zis-transactions'
-      : `/zis-transactions/${selectedTransaction.value.id}`
-    
-    // Validate that muzakki_id is selected and is a valid number
-    if (!form.value.muzakki_id) {
-      alert('Harap pilih muzakki terlebih dahulu')
+    // Validate donor is selected for donation transactions
+    if (transactionType.value === 'donation' && !form.value.donatur_id) {
+      alert('Donatur harus dipilih untuk transaksi donasi')
       isSubmitting.value = false
       return
     }
     
-    // Ensure muzakki_id is sent as a number if it's a string
-    const formData = {
-      ...form.value,
-      muzakki_id: isNaN(form.value.muzakki_id) ? form.value.muzakki_id : Number(form.value.muzakki_id)
+    // Ensure amount is a number
+    const amount = typeof form.value.jumlah === 'string' ? parseFloat(form.value.jumlah) || 0 : form.value.jumlah
+    
+    // Remove donor_id from form data for operational transactions
+    const formData = { ...form.value, jumlah: amount }
+    if (transactionType.value === 'operational') {
+      delete formData.donatur_id
     }
     
-    console.log('Submitting form data:', formData)
-    const response = await axios({
-      method,
-      url,
-      data: formData
-    })
+    const url = showCreateModal.value ? '/zis-transactions' : `/zis-transactions/${selectedTransaction.value.id}`
+    const method = showCreateModal.value ? 'post' : 'put'
     
-    console.log('Form submission response:', response)
+    const response = await axios[method](url, formData)
     
     if (response.data && response.data.success) {
       closeModal()
       fetchTransactions()
-      alert(showCreateModal.value ? 'Transaksi berhasil ditambahkan!' : 'Transaksi berhasil diperbarui!')
+      alert(showCreateModal.value ? 'Transaksi berhasil ditambahkan' : 'Transaksi berhasil diperbarui')
     } else {
-      const errorMessage = response.data?.message || response.data?.error || 'Gagal menyimpan transaksi'
-      alert('Terjadi kesalahan: ' + errorMessage)
+      const errorMessage = response.data?.message || 'Unknown error occurred'
+      alert('Gagal menyimpan transaksi: ' + errorMessage)
     }
   } catch (error: any) {
-    console.error('Error submitting form:', error)
+    console.error('Error saving transaction:', error)
     console.error('Error response:', error.response)
     
-    // Check if it's an authentication error
-    if (error.response?.status === 401) {
-      alert('Sesi Anda telah berakhir. Silakan login kembali.')
-      // You might want to redirect to login
-      return
-    } else if (error.response?.status === 403) {
-      console.error('Access forbidden - insufficient permissions')
-      alert('Anda tidak memiliki izin untuk menyimpan data transaksi.')
-    } else if (error.response?.status === 422) {
-      // Validation errors
-      const validationErrors = error.response.data?.errors
-      if (validationErrors) {
-        const errorMessages = Object.values(validationErrors).flat()
-        alert('Validasi gagal:\n' + errorMessages.join('\n'))
-      } else {
-        const errorMessage = error.response.data?.message || 'Validasi gagal'
-        alert('Validasi gagal: ' + errorMessage)
-      }
+    if (error.response?.data?.errors) {
+      const errorMessages = Object.values(error.response.data.errors).flat()
+      alert('Validasi error: ' + errorMessages.join(', '))
     } else {
-      const errorMessage = error.response?.data?.message || error.response?.data?.error || error.message || 'Terjadi kesalahan saat menyimpan transaksi'
-      alert('Error: ' + errorMessage)
+      alert('Terjadi kesalahan saat menyimpan transaksi')
     }
   } finally {
     isSubmitting.value = false
@@ -758,9 +811,8 @@ const submitForm = async () => {
 }
 
 const viewTransaction = (transaction: any) => {
-  // Implementation for view modal
-  console.log('View transaction:', transaction)
-  alert(`Detail transaksi: ${transaction.nomor_transaksi}`)
+  selectedTransaction.value = transaction
+  showDetailModal.value = true
 }
 
 const editTransaction = (transaction: any) => {
@@ -768,29 +820,36 @@ const editTransaction = (transaction: any) => {
   form.value = {
     nomor_transaksi: transaction.nomor_transaksi,
     tanggal_transaksi: transaction.tanggal_transaksi,
-    muzakki_id: transaction.muzakki_id,
+    donatur_id: transaction.donatur_id,
     jenis_zis: transaction.jenis_zis,
     jumlah: transaction.jumlah,
     metode_pembayaran: transaction.metode_pembayaran || 'tunai',
     no_referensi: transaction.no_referensi || '',
     keterangan: transaction.keterangan || ''
   }
+  
+  // Set transaction type based on whether donor exists
+  transactionType.value = transaction.donatur_id ? 'donation' : 'operational'
+  
   showEditModal.value = true
+  showDetailModal.value = false
   showOCRSection.value = false
 }
 
 const closeModal = () => {
   showCreateModal.value = false
   showEditModal.value = false
+  showDetailModal.value = false
   showOCRSection.value = false
   selectedTransaction.value = null
   ocrResult.value = null
+  transactionType.value = 'donation' // Reset to default
   
   // Reset form
   form.value = {
     nomor_transaksi: '',
     tanggal_transaksi: new Date().toISOString().split('T')[0],
-    muzakki_id: '',
+    donatur_id: '',
     jenis_zis: '',
     jumlah: 0,
     metode_pembayaran: 'tunai',
@@ -799,9 +858,57 @@ const closeModal = () => {
   }
 }
 
+const closeDetailModal = () => {
+  showDetailModal.value = false
+  selectedTransaction.value = null
+}
+
 const refreshData = () => {
   fetchTransactions()
-  fetchMuzakkiList()
+  fetchDonaturList()
+}
+
+const deleteTransaction = async (transaction: any) => {
+  selectedTransaction.value = transaction
+  showDeleteConfirmModal.value = true
+}
+
+const confirmDeleteTransaction = async () => {
+  showDeleteConfirmModal.value = false
+  
+  try {
+    // Show loading state
+    isLoading.value = true
+    
+    const response = await axios.delete(`/zis-transactions/${selectedTransaction.value.id}`)
+    
+    if (response.data && response.data.success) {
+      // Close detail modal if it's for the deleted transaction
+      if (selectedTransaction.value && selectedTransaction.value.id === selectedTransaction.value.id) {
+        closeDetailModal()
+      }
+      
+      // Refresh the transaction list
+      await fetchTransactions()
+      showDeleteSuccessModal.value = true
+    } else {
+      const errorMessage = response.data?.message || 'Unknown error occurred'
+      alert('Gagal menghapus transaksi: ' + errorMessage)
+    }
+  } catch (error: any) {
+    console.error('Error deleting transaction:', error)
+    console.error('Error response:', error.response)
+    
+    if (error.response?.status === 404) {
+      alert('Transaksi tidak ditemukan')
+    } else if (error.response?.status === 403) {
+      alert('Anda tidak memiliki izin untuk menghapus transaksi ini')
+    } else {
+      alert('Terjadi kesalahan saat menghapus transaksi')
+    }
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const clearFilters = () => {
@@ -824,15 +931,53 @@ const formatCurrency = (amount: number) => {
 }
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('id-ID')
+  return new Date(date).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// Helper function to convert number to words (simplified version)
+const convertNumberToWords = (number: number): string => {
+  // This is a simplified version - in a real application, you might want to use a proper library
+  const ones = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan']
+  const teens = ['sepuluh', 'sebelas', 'dua belas', 'tiga belas', 'empat belas', 'lima belas', 'enam belas', 'tujuh belas', 'delapan belas', 'sembilan belas']
+  const tens = ['', '', 'dua puluh', 'tiga puluh', 'empat puluh', 'lima puluh', 'enam puluh', 'tujuh puluh', 'delapan puluh', 'sembilan puluh']
+  
+  if (number === 0) return 'nol'
+  
+  const numStr = Math.floor(number).toString()
+  if (numStr.length > 12) return numStr // Too large, return as is
+  
+  // Handle simple cases
+  if (number < 10) return ones[number]
+  if (number < 20) return teens[number - 10]
+  if (number < 100) {
+    const ten = Math.floor(number / 10)
+    const one = number % 10
+    return tens[ten] + (one > 0 ? ' ' + ones[one] : '')
+  }
+  
+  // For larger numbers, we'll use a simplified approach
+  return number.toLocaleString('id-ID')
+}
+
+const getStatusText = (status: string) => {
+  const statusMap: Record<string, string> = {
+    pending: 'Pending',
+    verified: 'Terverifikasi',
+    rejected: 'Ditolak'
+  }
+  return statusMap[status] || status
 }
 
 const getStatusBadgeClass = (status: string) => {
   switch (status) {
-    case 'verified':
-      return 'bg-green-100 text-green-800'
     case 'pending':
       return 'bg-yellow-100 text-yellow-800'
+    case 'verified':
+      return 'bg-green-100 text-green-800'
     case 'rejected':
       return 'bg-red-100 text-red-800'
     default:
@@ -840,70 +985,80 @@ const getStatusBadgeClass = (status: string) => {
   }
 }
 
-const getStatusText = (status: string) => {
-  const statusMap: Record<string, string> = {
-    'pending': 'Menunggu',
-    'verified': 'Terverifikasi', 
-    'rejected': 'Ditolak'
-  }
-  return statusMap[status] || status
-}
-
-const getZisTypeClass = (jenis: string) => {
-  switch (jenis) {
+const getZisTypeClass = (type: string) => {
+  switch (type) {
     case 'zakat':
       return 'bg-blue-100 text-blue-800'
     case 'infaq':
-      return 'bg-green-100 text-green-800'
-    case 'sedekah':
       return 'bg-purple-100 text-purple-800'
+    case 'sedekah':
+      return 'bg-green-100 text-green-800'
     default:
       return 'bg-gray-100 text-gray-800'
   }
 }
+
+const getZisTypeText = (type: string) => {
+  const typeMap: Record<string, string> = {
+    zakat: 'Pembayaran Zakat',
+    infaq: 'Infaq',
+    sedekah: 'Sedekah'
+  }
+  return typeMap[type] || type
+}
+
+const handleOCRSuccess = (result: any) => {
+  ocrResult.value = result
+  showOCRSection.value = false
+  
+  // Auto-fill form with OCR data if available
+  if (result.fields) {
+    // This would depend on the structure of your OCR result
+    // You might need to adjust based on actual OCR output
+    if (result.fields.amount) {
+      form.value.jumlah = parseFloat(result.fields.amount.replace(/[^0-9]/g, '')) || 0
+    }
+    if (result.fields.date) {
+      form.value.tanggal_transaksi = result.fields.date
+    }
+    if (result.fields.description) {
+      form.value.keterangan = result.fields.description
+    }
+  }
+}
+
+const printReceipt = () => {
+  if (!selectedTransaction.value) return
+  
+  const transaction = selectedTransaction.value
+  
+  // Get transaction type description
+  let transactionTypeDesc = getZisTypeText(transaction.jenis_zis)
+  
+  // Add specific zakat type if applicable
+  if (transaction.jenis_zis === 'zakat' && transaction.donatur?.jenis_zakat) {
+    transactionTypeDesc += ` (${transaction.donatur.jenis_zakat})`
+  }
+  
+  // Format the receipt content
+  const receiptContent = ``
+  
+  // Open the receipt in a new window for printing
+  const printWindow = window.open('', '_blank')
+  if (printWindow) {
+    printWindow.document.write(receiptContent)
+    printWindow.document.close()
+    printWindow.focus()
+    
+    // Wait a bit for content to load before printing
+    setTimeout(() => {
+      printWindow.print()
+      // Optionally close the window after printing
+      // printWindow.close()
+    }, 250)
+  } else {
+    alert('Popup blocker mencegah pencetakan. Mohon izinkan popup untuk situs ini.')
+  }
+}
+
 </script>
-
-<style scoped>
-/* Additional responsive styles */
-@media (max-width: 639px) {
-  .btn-primary,
-  .btn-secondary {
-    @apply w-full justify-center;
-  }
-  
-  .card {
-    @apply mx-0 rounded-lg;
-  }
-  
-  table {
-    font-size: 0.875rem;
-  }
-  
-  th, td {
-    padding: 0.5rem 0.75rem;
-  }
-  
-  .max-w-32 {
-    max-width: 8rem;
-  }
-  
-  .max-w-24 {
-    max-width: 6rem;
-  }
-}
-
-/* Extra small devices */
-@media (max-width: 480px) {
-  .card {
-    @apply p-3;
-  }
-  
-  th, td {
-    padding: 0.25rem 0.5rem;
-  }
-  
-  .truncate {
-    max-width: 6rem;
-  }
-}
-</style>

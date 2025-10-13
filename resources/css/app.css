@@ -1,10 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 font-sans;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .asset-id {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
@@ -31,6 +38,14 @@
   
   .btn-outline {
     @apply border border-gray-300 text-gray-700 hover:bg-gray-50;
+  }
+  
+  .btn-primary-sm {
+    @apply px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors;
+  }
+  
+  .btn-secondary-sm {
+    @apply px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded-md hover:bg-gray-300 transition-colors;
   }
   
   .card {

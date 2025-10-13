@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\Muzakki;
+use App\Models\Donatur;
 use App\Models\ZisTransaction;
 use App\Models\Mustahiq;
 use App\Models\Distribution;
@@ -41,20 +41,20 @@ class SeedMLDataCommand extends Command
         $program = Program::first();
         $user = User::first();
 
-        // Create sample muzakkis (donors)
-        if (Muzakki::count() < 50) {
-            $muzakkis = Muzakki::factory()->count(50)->create();
-            $this->info('Created 50 sample muzakkis');
+        // Create sample donaturs (donors)
+        if (Donatur::count() < 50) {
+            $donaturs = Donatur::factory()->count(50)->create();
+            $this->info('Created 50 sample donaturs');
         } else {
-            $muzakkis = Muzakki::take(50)->get();
-            $this->info('Using existing muzakkis');
+            $donaturs = Donatur::take(50)->get();
+            $this->info('Using existing donaturs');
         }
 
         // Create sample transactions for the past 12 months
         $transactionCount = ZisTransaction::count();
         if ($transactionCount < 500) {
-            foreach ($muzakkis as $muzakki) {
-                // Create 5-15 transactions per muzakki
+            foreach ($donaturs as $donatur) {
+                // Create 5-15 transactions per donatur
                 $transactionCount = rand(5, 15);
                 
                 for ($i = 0; $i < $transactionCount; $i++) {
@@ -66,7 +66,7 @@ class SeedMLDataCommand extends Command
                     
                     ZisTransaction::create([
                         'nomor_transaksi' => 'TRX-' . Str::random(8),
-                        'muzakki_id' => $muzakki->id,
+                        'donatur_id' => $donatur->id,
                         'jumlah' => $amount,
                         'jenis_zis' => ['zakat', 'infaq', 'sedekah'][rand(0, 2)],
                         'tanggal_transaksi' => $randomDate,
@@ -121,7 +121,7 @@ class SeedMLDataCommand extends Command
         }
 
         $this->info('ML Analytics test data seeding completed successfully!');
-        $this->info('Total muzakkis: ' . Muzakki::count());
+        $this->info('Total donaturs: ' . Donatur::count());
         $this->info('Total transactions: ' . ZisTransaction::count());
         $this->info('Total mustahiqs: ' . Mustahiq::count());
         $this->info('Total distributions: ' . Distribution::count());

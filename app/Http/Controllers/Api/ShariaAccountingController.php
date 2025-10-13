@@ -3,84 +3,52 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\ShariaFundCategory;
-use App\Models\ShariaAccount;
 use App\Models\ShariaTransaction;
+use App\Models\ShariaAccount;
+use App\Models\ShariaFundCategory;
 use App\Models\ZisTransaction;
 use App\Models\Distribution;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
 
 class ShariaAccountingController extends Controller
 {
     /**
-     * Get dashboard overview for Sharia Accounting
+     * Get dashboard data
      */
-    public function dashboard(): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
         try {
-            $currentMonth = Carbon::now()->startOfMonth();
-            $currentYear = Carbon::now()->startOfYear();
+            $startDate = $request->input('start_date', now()->startOfMonth()->toDateString());
+            $endDate = $request->input('end_date', now()->endOfMonth()->toDateString());
+
+            // Financial summary
+            $financialSummary = $this->getFinancialSummary($startDate, $endDate);
             
-            // Get fund balances by category
-            $fundBalances = ShariaFundCategory::active()
-                ->with('accounts')
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'category' => $category->name,
-                        'code' => $category->code,
-                        'type' => $category->type,
-                        'balance' => $category->getTotalBalance(),
-                        'is_baznas_compliant' => $category->isBaznasCompliant()
-                    ];
-                });
-            
-            // Get monthly transactions summary
-            $monthlyTransactions = ShariaTransaction::byDateRange($currentMonth, now())
-                ->posted()
-                ->selectRaw('
-                    transaction_type,
-                    SUM(amount) as total_amount,
-                    COUNT(*) as transaction_count
-                ')
-                ->groupBy('transaction_type')
-                ->get();
-            
-            // Get yearly summary
-            $yearlySummary = ShariaTransaction::byDateRange($currentYear, now())
-                ->posted()
-                ->selectRaw('
-                    SUM(CASE WHEN transaction_type = "collection" THEN amount ELSE 0 END) as total_collection,
-                    SUM(CASE WHEN transaction_type = "distribution" THEN amount ELSE 0 END) as total_distribution,
-                    SUM(amil_amount) as total_amil
-                ')
-                ->first();
-            
-            // Get compliance metrics
-            $complianceMetrics = $this->getComplianceMetrics();
-            
-            // Get recent transactions
+            // Recent transactions
             $recentTransactions = ShariaTransaction::with([
-                'fundCategory:id,name,code',
-                'debitAccount:id,account_name',
-                'creditAccount:id,account_name'
+                'fundCategory:id,name',
+                'debitAccount:id,account_code,account_name',
+                'creditAccount:id,account_code,account_name'
             ])
             ->orderBy('created_at', 'desc')
             ->limit(10)
             ->get();
             
+            // Fund categories with balances
+            $fundCategories = ShariaFundCategory::withCount([
+                'transactions as transaction_count',
+                'accounts as account_count'
+            ])->get();
+            
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'fund_balances' => $fundBalances,
-                    'monthly_transactions' => $monthlyTransactions,
-                    'yearly_summary' => $yearlySummary,
-                    'compliance_metrics' => $complianceMetrics,
-                    'recent_transactions' => $recentTransactions
+                    'financial_summary' => $financialSummary,
+                    'recent_transactions' => $recentTransactions,
+                    'fund_categories' => $fundCategories
                 ]
             ]);
             
@@ -94,28 +62,43 @@ class ShariaAccountingController extends Controller
     }
     
     /**
+     * Get financial summary
+     */
+    public function getFinancialSummary($startDate, $endDate): array
+    {
+        // Total collections
+        $totalCollections = ShariaTransaction::where('transaction_type', 'collection')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount');
+            
+        // Total distributions
+        $totalDistributions = ShariaTransaction::where('transaction_type', 'distribution')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amount');
+            
+        // Net balance
+        $netBalance = $totalCollections - $totalDistributions;
+        
+        // Amil income
+        $amilIncome = ShariaTransaction::where('transaction_type', 'collection')
+            ->whereBetween('transaction_date', [$startDate, $endDate])
+            ->sum('amil_amount');
+            
+        return [
+            'total_collections' => $totalCollections,
+            'total_distributions' => $totalDistributions,
+            'net_balance' => $netBalance,
+            'amil_income' => $amilIncome
+        ];
+    }
+    
+    /**
      * Get fund categories
      */
     public function getFundCategories(): JsonResponse
     {
         try {
-            $categories = ShariaFundCategory::active()
-                ->with('accounts')
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'id' => $category->id,
-                        'code' => $category->code,
-                        'name' => $category->name,
-                        'name_ar' => $category->name_ar,
-                        'type' => $category->type,
-                        'amil_percentage' => $category->amil_percentage,
-                        'total_balance' => $category->getTotalBalance(),
-                        'is_baznas_compliant' => $category->isBaznasCompliant(),
-                        'distribution_rules' => $category->getAsnafDistribution(),
-                        'accounts_count' => $category->accounts->count()
-                    ];
-                });
+            $categories = ShariaFundCategory::all();
             
             return response()->json([
                 'success' => true,
@@ -134,31 +117,20 @@ class ShariaAccountingController extends Controller
     /**
      * Get chart of accounts
      */
-    public function getChartOfAccounts(): JsonResponse
+    public function getChartOfAccounts(Request $request): JsonResponse
     {
         try {
-            $accounts = ShariaAccount::active()
-                ->with(['fundCategory:id,name,code', 'parent', 'children'])
-                ->orderBy('account_code')
-                ->get()
-                ->map(function ($account) {
-                    return [
-                        'id' => $account->id,
-                        'account_code' => $account->account_code,
-                        'account_name' => $account->account_name,
-                        'account_name_ar' => $account->account_name_ar,
-                        'account_type' => $account->account_type,
-                        'normal_balance' => $account->normal_balance,
-                        'level' => $account->level,
-                        'current_balance' => $account->current_balance,
-                        'fund_category' => $account->fundCategory,
-                        'parent_code' => $account->parent_code,
-                        'is_control_account' => $account->isControlAccount(),
-                        'hierarchy_path' => $account->getHierarchyPath(),
-                        'is_baznas_required' => $account->is_baznas_required,
-                        'baznas_mapping' => $account->baznas_mapping
-                    ];
-                });
+            $categoryId = $request->input('fund_category_id');
+            $perPage = $request->input('per_page', 15);
+            
+            $query = ShariaAccount::with('fundCategory:id,name');
+            
+            if ($categoryId) {
+                $query->where('fund_category_id', $categoryId);
+            }
+            
+            $accounts = $query->orderBy('account_code')
+                ->paginate($perPage);
             
             return response()->json([
                 'success' => true,
@@ -175,7 +147,7 @@ class ShariaAccountingController extends Controller
     }
     
     /**
-     * Get transactions with filters
+     * Get transactions
      */
     public function getTransactions(Request $request): JsonResponse
     {
@@ -191,7 +163,7 @@ class ShariaAccountingController extends Controller
                 'fundCategory:id,name,code',
                 'debitAccount:id,account_code,account_name',
                 'creditAccount:id,account_code,account_name',
-                'muzakki:id,nama',
+                'donatur:id,nama',
                 'mustahiq:id,nama',
                 'creator:id,name',
                 'approver:id,name'
@@ -285,8 +257,8 @@ class ShariaAccountingController extends Controller
                 'amil_amount' => $fundCategory->calculateAmilAmount($zisTransaction->jumlah),
                 'reference_type' => 'zis_transactions',
                 'reference_id' => $zisTransaction->id,
-                'muzakki_id' => $zisTransaction->muzakki_id,
-                'description' => 'Penerimaan ' . $fundCategory->name . ' dari ' . $zisTransaction->muzakki->nama,
+                'donatur_id' => $zisTransaction->donatur_id,
+                'description' => 'Penerimaan ' . $fundCategory->name . ' dari ' . $zisTransaction->donatur->nama,
                 'baznas_notes' => 'Transaksi sesuai standar BAZNAS',
                 'is_baznas_compliant' => true,
                 'status' => 'approved',
@@ -307,7 +279,7 @@ class ShariaAccountingController extends Controller
                     'fundCategory',
                     'debitAccount',
                     'creditAccount',
-                    'muzakki'
+                    'donatur'
                 ])
             ]);
             
@@ -385,13 +357,14 @@ class ShariaAccountingController extends Controller
                 'approved_at' => now()
             ]);
             
+            // Post the transaction
             $transaction->postTransaction();
             
             DB::commit();
             
             return response()->json([
                 'success' => true,
-                'message' => 'Distribution transaction created successfully',
+                'message' => 'Sharia transaction created successfully',
                 'data' => $transaction->load([
                     'fundCategory',
                     'debitAccount',
@@ -404,103 +377,7 @@ class ShariaAccountingController extends Controller
             DB::rollback();
             return response()->json([
                 'success' => false,
-                'message' => 'Error creating distribution transaction',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
-    /**
-     * Get compliance metrics
-     */
-    private function getComplianceMetrics(): array
-    {
-        $currentYear = Carbon::now()->startOfYear();
-        
-        $totalTransactions = ShariaTransaction::byDateRange($currentYear, now())->count();
-        $compliantTransactions = ShariaTransaction::byDateRange($currentYear, now())
-            ->baznasCompliant()
-            ->count();
-            
-        $complianceRate = $totalTransactions > 0 
-            ? ($compliantTransactions / $totalTransactions) * 100 
-            : 100;
-        
-        // Check amil percentage compliance
-        $totalCollection = ShariaTransaction::byDateRange($currentYear, now())
-            ->byType('collection')
-            ->sum('amount');
-            
-        $totalAmil = ShariaTransaction::byDateRange($currentYear, now())
-            ->sum('amil_amount');
-            
-        $averageAmilPercentage = $totalCollection > 0 
-            ? ($totalAmil / $totalCollection) * 100 
-            : 0;
-        
-        $amilCompliance = $averageAmilPercentage <= 12.5;
-        
-        return [
-            'compliance_rate' => round($complianceRate, 2),
-            'total_transactions' => $totalTransactions,
-            'compliant_transactions' => $compliantTransactions,
-            'amil_percentage' => round($averageAmilPercentage, 2),
-            'amil_compliance' => $amilCompliance,
-            'baznas_standard_amil' => 12.5
-        ];
-    }
-    
-    /**
-     * Get financial summary for a period
-     */
-    public function getFinancialSummary(Request $request): JsonResponse
-    {
-        try {
-            $startDate = $request->input('start_date', Carbon::now()->startOfMonth());
-            $endDate = $request->input('end_date', Carbon::now());
-            
-            $summary = ShariaTransaction::byDateRange($startDate, $endDate)
-                ->posted()
-                ->selectRaw('
-                    SUM(CASE WHEN transaction_type = "collection" THEN amount ELSE 0 END) as total_collection,
-                    SUM(CASE WHEN transaction_type = "distribution" THEN amount ELSE 0 END) as total_distribution,
-                    SUM(CASE WHEN transaction_type = "amil_allocation" THEN amount ELSE 0 END) as total_amil_allocation,
-                    SUM(amil_amount) as total_amil,
-                    COUNT(CASE WHEN transaction_type = "collection" THEN 1 END) as collection_count,
-                    COUNT(CASE WHEN transaction_type = "distribution" THEN 1 END) as distribution_count
-                ')
-                ->first();
-            
-            // Get balances by fund category
-            $fundBalances = ShariaFundCategory::active()
-                ->get()
-                ->map(function ($category) {
-                    return [
-                        'category' => $category->name,
-                        'type' => $category->type,
-                        'balance' => $category->getTotalBalance()
-                    ];
-                });
-            
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'period' => [
-                        'start_date' => $startDate,
-                        'end_date' => $endDate
-                    ],
-                    'summary' => $summary,
-                    'fund_balances' => $fundBalances,
-                    'distribution_efficiency' => $summary->total_collection > 0 
-                        ? round(($summary->total_distribution / $summary->total_collection) * 100, 2)
-                        : 0
-                ]
-            ]);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error fetching financial summary',
+                'message' => 'Error creating sharia transaction',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'bidang1'
         ], [
             'display_name' => 'Bidang Pengumpulan',
-            'description' => 'Manages muzakki, UPZ, and ZIS collection'
+            'description' => 'Manages donatur, UPZ, and ZIS collection'
         ]);
 
         $bidang2Role = Role::firstOrCreate([
@@ -40,6 +40,35 @@ class DatabaseSeeder extends Seeder
         ], [
             'display_name' => 'Bidang Arsip Surat',
             'description' => 'Manages document archiving'
+        ]);
+
+        // Create roles for department heads (Wakil Bidang)
+        $wakil1Role = Role::firstOrCreate([
+            'name' => 'wakil1'
+        ], [
+            'display_name' => 'Wakil Bidang I - Pengumpulan',
+            'description' => 'Focus on donatur, collection targets and realization'
+        ]);
+
+        $wakil2Role = Role::firstOrCreate([
+            'name' => 'wakil2'
+        ], [
+            'display_name' => 'Wakil Bidang II - Distribusi',
+            'description' => 'Focus on mustahiq, distribution, and program outcomes'
+        ]);
+
+        $wakil3Role = Role::firstOrCreate([
+            'name' => 'wakil3'
+        ], [
+            'display_name' => 'Wakil Bidang III - Keuangan',
+            'description' => 'Focus on budget absorption, deviations, and report status'
+        ]);
+
+        $wakil4Role = Role::firstOrCreate([
+            'name' => 'wakil4'
+        ], [
+            'display_name' => 'Wakil Bidang IV - SDM & SOP',
+            'description' => 'Focus on SOP compliance, HR status, and assets'
         ]);
 
         // Create users only if they don't exist
@@ -83,7 +112,48 @@ class DatabaseSeeder extends Seeder
             'status' => 'active'
         ]);
 
-        // Create sample Muzakki data only if table is empty
+        // Create accounts for department heads (Wakil Bidang)
+        User::firstOrCreate([
+            'email' => 'wakil1@zis.com'
+        ], [
+            'name' => 'Wakil Bidang I',
+            'password' => Hash::make('password'),
+            'role_id' => $wakil1Role->id,
+            'phone' => '081234567901',
+            'status' => 'active'
+        ]);
+
+        User::firstOrCreate([
+            'email' => 'wakil2@zis.com'
+        ], [
+            'name' => 'Wakil Bidang II',
+            'password' => Hash::make('password'),
+            'role_id' => $wakil2Role->id,
+            'phone' => '081234567902',
+            'status' => 'active'
+        ]);
+
+        User::firstOrCreate([
+            'email' => 'wakil3@zis.com'
+        ], [
+            'name' => 'Wakil Bidang III',
+            'password' => Hash::make('password'),
+            'role_id' => $wakil3Role->id,
+            'phone' => '081234567903',
+            'status' => 'active'
+        ]);
+
+        User::firstOrCreate([
+            'email' => 'wakil4@zis.com'
+        ], [
+            'name' => 'Wakil Bidang IV',
+            'password' => Hash::make('password'),
+            'role_id' => $wakil4Role->id,
+            'phone' => '081234567904',
+            'status' => 'active'
+        ]);
+
+        // Create sample Donatur data only if table is empty
         if (Muzakki::count() == 0) {
             $muzakkiData = [
                 [
@@ -92,7 +162,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Merdeka No. 15, Bandung, Jawa Barat',
                     'telepon' => '081234567001',
                     'email' => 'ahmad.wijaya@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'laki-laki',
                     'keterangan' => 'Pegawai negeri sipil, rutin membayar zakat'
                 ],
                 [
@@ -101,7 +172,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Sudirman No. 88, Jakarta Selatan, DKI Jakarta',
                     'telepon' => '081234567002',
                     'email' => 'siti.nurhaliza@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'perempuan',
                     'keterangan' => 'Dokter spesialis, aktif dalam kegiatan sosial'
                 ],
                 [
@@ -110,7 +182,7 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Gatot Subroto Kav. 32, Jakarta Pusat, DKI Jakarta',
                     'telepon' => '021234567003',
                     'email' => 'admin@berkahmandiri.co.id',
-                    'jenis' => 'perusahaan',
+                    'jenis_donatur' => 'lembaga',
                     'keterangan' => 'Perusahaan trading, pembayar zakat perusahaan rutin'
                 ],
                 [
@@ -119,7 +191,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Ahmad Yani No. 45, Surabaya, Jawa Timur',
                     'telepon' => '081234567004',
                     'email' => 'mridwan@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'laki-laki',
                     'keterangan' => 'Pengusaha kecil, pembayar zakat fitrah dan mal'
                 ],
                 [
@@ -128,7 +201,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Diponegoro No. 67, Yogyakarta, DI Yogyakarta',
                     'telepon' => '081234567005',
                     'email' => 'fatimah.azzahra@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'perempuan',
                     'keterangan' => 'Guru sekolah dasar, rajin membayar zakat'
                 ],
                 [
@@ -137,7 +211,7 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Malioboro No. 123, Yogyakarta, DI Yogyakarta',
                     'telepon' => '0274567890',
                     'email' => 'info@harapanjaya.co.id',
-                    'jenis' => 'perusahaan',
+                    'jenis_donatur' => 'lembaga',
                     'keterangan' => 'Toko oleh-oleh dan kerajinan, zakat perusahaan'
                 ],
                 [
@@ -146,7 +220,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Pahlawan No. 78, Pontianak, Kalimantan Barat',
                     'telepon' => '081234567006',
                     'email' => 'abdul.rahman@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'laki-laki',
                     'keterangan' => 'Petani sawit, pembayar zakat hasil pertanian'
                 ],
                 [
@@ -155,7 +230,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Cut Nyak Dien No. 34, Banda Aceh, Aceh',
                     'telepon' => '081234567007',
                     'email' => 'khadijah.salsabila@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'perempuan',
                     'keterangan' => 'Pegawai swasta, aktif dalam komunitas masjid'
                 ],
                 [
@@ -164,7 +240,7 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. HR. Rasuna Said No. 56, Jakarta Selatan, DKI Jakarta',
                     'telepon' => '021234567008',
                     'email' => 'hr@teknologimaju.com',
-                    'jenis' => 'perusahaan',
+                    'jenis_donatur' => 'lembaga',
                     'keterangan' => 'Perusahaan IT, program CSR dan zakat perusahaan'
                 ],
                 [
@@ -173,7 +249,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Sultan Hasanuddin No. 89, Makassar, Sulawesi Selatan',
                     'telepon' => '081234567009',
                     'email' => 'omar.faruq@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'laki-laki',
                     'keterangan' => 'Nelayan, pembayar zakat hasil laut'
                 ],
                 [
@@ -182,7 +259,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Gajah Mada No. 12, Pekanbaru, Riau',
                     'telepon' => '081234567010',
                     'email' => 'aisyah.ramadhani@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'perempuan',
                     'keterangan' => 'Pengusaha salon, pembayar zakat profesi'
                 ],
                 [
@@ -191,7 +269,7 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Juanda No. 45, Malang, Jawa Timur',
                     'telepon' => '0341567890',
                     'email' => 'admin@sumberrezeki.co.id',
-                    'jenis' => 'perusahaan',
+                    'jenis_donatur' => 'lembaga',
                     'keterangan' => 'Distributor sembako, zakat perdagangan'
                 ],
                 [
@@ -200,7 +278,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Ahmad Dahlan No. 23, Balikpapan, Kalimantan Timur',
                     'telepon' => '081234567011',
                     'email' => 'yusuf.mansur@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'laki-laki',
                     'keterangan' => 'Insinyur tambang, pembayar zakat profesi rutin'
                 ],
                 [
@@ -209,7 +288,8 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Imam Bonjol No. 67, Lampung, Lampung',
                     'telepon' => '081234567012',
                     'email' => 'zahra.aulia@email.com',
-                    'jenis' => 'individu',
+                    'jenis_donatur' => 'individu',
+                    'jenis_kelamin' => 'perempuan',
                     'keterangan' => 'Bidan praktek mandiri, aktif dalam kegiatan dakwah'
                 ],
                 [
@@ -218,8 +298,27 @@ class DatabaseSeeder extends Seeder
                     'alamat' => 'Jl. Veteran No. 90, Semarang, Jawa Tengah',
                     'telepon' => '024567890',
                     'email' => 'finance@sejahteraabadi.com',
-                    'jenis' => 'perusahaan',
+                    'jenis_donatur' => 'lembaga',
                     'keterangan' => 'Perusahaan manufaktur, pembayar zakat perusahaan dan CSR'
+                ],
+                [
+                    'nama' => 'Yayasan Pendidikan Berkah',
+                    'nik' => '0712345678901239',
+                    'alamat' => 'Jl. Pendidikan No. 10, Jakarta Pusat, DKI Jakarta',
+                    'telepon' => '021234567013',
+                    'email' => 'info@yayasanberkah.org',
+                    'jenis_donatur' => 'lembaga',
+                    'keterangan' => 'Yayasan pendidikan, donatur infaq dan sedekah'
+                ],
+                [
+                    'nama' => 'Budi Santoso',
+                    'nik' => '1171012345678910',
+                    'alamat' => 'Jl. Merdeka No. 10, Jakarta Pusat',
+                    'telepon' => '081234567014',
+                    'email' => 'budi.santoso@email.com',
+                    'jenis_donatur' => 'munfiq',
+                    'jenis_kelamin' => 'laki-laki',
+                    'keterangan' => 'Pengusaha, donatur infaq dan sedekah rutin'
                 ]
             ];
 

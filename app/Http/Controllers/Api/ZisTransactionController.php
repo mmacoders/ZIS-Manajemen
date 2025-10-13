@@ -4,44 +4,139 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ZisTransaction;
-use App\Events\ZisTransactionCreated;
+use App\Models\Donatur;
+use App\Models\Upz;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ZisTransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $transactions = ZisTransaction::with(['muzakki', 'upz', 'verifier'])->paginate(20);
-        return response()->json($transactions);
+        try {
+            $query = ZisTransaction::with(['donatur', 'upz']);
+
+            // Search functionality
+            if ($request->search) {
+                $search = $request->search;
+                $query->where(function($q) use ($search) {
+                    $q->where('nomor_transaksi', 'like', '%' . $search . '%')
+                      ->orWhereHas('donatur', function($q) use ($search) {
+                          $q->where('nama', 'like', '%' . $search . '%');
+                      })
+                      ->orWhereHas('upz', function($q) use ($search) {
+                          $q->where('nama', 'like', '%' . $search . '%');
+                      });
+                });
+            }
+
+            // Filter by jenis_zis
+            if ($request->jenis_zis) {
+                $query->where('jenis_zis', $request->jenis_zis);
+            }
+
+            // Filter by status
+            if ($request->status) {
+                $query->where('status', $request->status);
+            }
+
+            // Filter by date range
+            if ($request->start_date) {
+                $query->where('tanggal_transaksi', '>=', $request->start_date);
+            }
+
+            if ($request->end_date) {
+                $query->where('tanggal_transaksi', '<=', $request->end_date);
+            }
+
+            // Sorting
+            if ($request->sort_by) {
+                $direction = $request->sort_direction ?? 'asc';
+                $query->orderBy($request->sort_by, $direction);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            // Pagination
+            $perPage = $request->per_page ?? 10;
+            $transactions = $query->paginate($perPage);
+
+            return response()->json([
+                'success' => true,
+                'data' => $transactions
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'muzakki_id' => 'required|exists:muzakki,id',
-                'upz_id' => 'nullable|exists:upz,id',
+            // Conditional validation based on whether donor is provided
+            $rules = [
                 'jenis_zis' => 'required|in:zakat,infaq,sedekah',
-                'jumlah' => 'required|numeric|min:1000', // Minimum 1000
-                'tanggal_transaksi' => 'required|date|before_or_equal:today',
+                'jumlah' => 'required|numeric|min:0',
+                'tanggal_transaksi' => 'required|date',
                 'keterangan' => 'nullable|string|max:1000',
                 'bukti_transfer' => 'nullable|string|max:255'
-            ]);
+            ];
+            
+            // Only require donor_id if it's provided (not null/empty)
+            if ($request->has('donatur_id') && $request->donatur_id) {
+                $rules['donatur_id'] = 'required|exists:donatur,id';
+            }
+            
+            $request->validate($rules);
 
+            // Generate receipt number with new format
+            $tanggal = Carbon::parse($request->tanggal_transaksi);
+            $day = str_pad($tanggal->day, 2, '0', STR_PAD_LEFT);
+            $month = str_pad($tanggal->month, 2, '0', STR_PAD_LEFT);
+            $year = substr($tanggal->year, -1); // Last digit of year
+            
+            // Get donor type code
+            // 01 = perorangan (individual/munfiq)
+            // 02 = lembaga (institution)
+            // 03 = operasional (operational)
+            $donaturCode = '03'; // Default to operational
+            if ($request->has('donatur_id') && $request->donatur_id) {
+                $donatur = Donatur::find($request->donatur_id);
+                if ($donatur) {
+                    switch ($donatur->jenis_donatur) {
+                        case 'lembaga':
+                            $donaturCode = '02';
+                            break;
+                        case 'individu':
+                        case 'munfiq':
+                            $donaturCode = '01';
+                            break;
+                    }
+                }
+            }
+            
+            // Get transaction count for the day
+            $dailyCount = ZisTransaction::whereDate('tanggal_transaksi', $tanggal->toDateString())->count() + 1;
+            $dailyCountFormatted = str_pad($dailyCount, 7, '0', STR_PAD_LEFT);
+            
+            // New receipt number format: DD/MM/Y/DC (Day/Month/YearLastDigit/DonaturCode)/(DailyCount)
+            $nomor_kwitansi = "{$day}/{$month}/{$year}/{$donaturCode}/{$dailyCountFormatted}";
+            
+            // Prepare data for creation
             $data = $request->all();
-            $data['nomor_transaksi'] = 'ZIS-' . date('Ymd') . '-' . Str::random(6);
-            $data['status'] = 'pending';
+            $data['nomor_transaksi'] = $nomor_kwitansi;
             
             $transaction = ZisTransaction::create($data);
-            
-            // Broadcast event for real-time notifications
-            event(new ZisTransactionCreated($transaction));
-            
+
             return response()->json([
                 'success' => true,
-                'message' => 'Transaksi ZIS berhasil ditambahkan',
-                'data' => $transaction->load(['muzakki', 'upz'])
+                'message' => 'Transaksi berhasil ditambahkan',
+                'data' => $transaction->load(['donatur', 'upz'])
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -52,7 +147,7 @@ class ZisTransactionController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menyimpan transaksi',
+                'message' => 'Terjadi kesalahan saat menyimpan data',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -60,84 +155,177 @@ class ZisTransactionController extends Controller
 
     public function show($id)
     {
-        $transaction = ZisTransaction::with(['muzakki', 'upz', 'verifier'])->findOrFail($id);
-        return response()->json($transaction);
+        try {
+            $transaction = ZisTransaction::with(['donatur', 'upz', 'verifier'])->findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $transaction
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $transaction = ZisTransaction::findOrFail($id);
-        
-        $request->validate([
-            'muzakki_id' => 'required|exists:muzakki,id',
-            'upz_id' => 'nullable|exists:upz,id',
-            'jenis_zis' => 'required|in:zakat,infaq,sedekah',
-            'jumlah' => 'required|numeric|min:0',
-            'tanggal_transaksi' => 'required|date',
-            'keterangan' => 'nullable|string',
-            'bukti_transfer' => 'nullable|string'
-        ]);
+        try {
+            $transaction = ZisTransaction::findOrFail($id);
+            
+            // Conditional validation based on whether donor is provided
+            $rules = [
+                'jenis_zis' => 'required|in:zakat,infaq,sedekah',
+                'jumlah' => 'required|numeric|min:0',
+                'tanggal_transaksi' => 'required|date',
+                'keterangan' => 'nullable|string|max:1000',
+                'bukti_transfer' => 'nullable|string|max:255',
+                'status' => 'nullable|in:pending,verified,rejected',
+                'verified_by' => 'nullable|exists:users,id',
+                'verified_at' => 'nullable|date'
+            ];
+            
+            // Only require donor_id if it's provided (not null/empty)
+            if ($request->has('donatur_id') && $request->donatur_id) {
+                $rules['donatur_id'] = 'required|exists:donatur,id';
+            }
+            
+            $request->validate($rules);
 
-        $transaction->update($request->all());
-        return response()->json($transaction->load(['muzakki', 'upz']));
-    }
+            // Update data
+            $transaction->update($request->all());
 
-    public function verify(Request $request, $id)
-    {
-        $transaction = ZisTransaction::findOrFail($id);
-        
-        $request->validate([
-            'status' => 'required|in:verified,rejected'
-        ]);
-
-        $transaction->update([
-            'status' => $request->status,
-            'verified_by' => auth()->id(),
-            'verified_at' => now()
-        ]);
-
-        return response()->json($transaction->load(['muzakki', 'upz', 'verifier']));
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil diperbarui',
+                'data' => $transaction->load(['donatur', 'upz'])
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi tidak ditemukan'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->validator->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function destroy($id)
     {
-        $transaction = ZisTransaction::findOrFail($id);
-        $transaction->delete();
-        return response()->json(['message' => 'Transaction deleted successfully']);
+        try {
+            $transaction = ZisTransaction::findOrFail($id);
+            $transaction->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil dihapus'
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus data',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function report(Request $request)
+    public function verify(Request $request, $id)
     {
-        $query = ZisTransaction::with(['muzakki', 'upz'])
-            ->where('status', 'verified');
+        try {
+            $transaction = ZisTransaction::findOrFail($id);
+            
+            $request->validate([
+                'status' => 'required|in:verified,rejected',
+                'verified_by' => 'required|exists:users,id'
+            ]);
 
-        if ($request->start_date) {
-            $query->whereDate('tanggal_transaksi', '>=', $request->start_date);
+            $transaction->update([
+                'status' => $request->status,
+                'verified_by' => $request->verified_by,
+                'verified_at' => Carbon::now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Transaksi berhasil diverifikasi',
+                'data' => $transaction->load(['donatur', 'upz', 'verifier'])
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Transaksi tidak ditemukan'
+            ], 404);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->validator->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memverifikasi transaksi',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
 
-        if ($request->end_date) {
-            $query->whereDate('tanggal_transaksi', '<=', $request->end_date);
+    public function getTotalAmountByPeriod(Request $request)
+    {
+        try {
+            $query = ZisTransaction::where('status', 'verified');
+
+            // Filter by date range
+            if ($request->start_date) {
+                $query->where('tanggal_transaksi', '>=', $request->start_date);
+            }
+
+            if ($request->end_date) {
+                $query->where('tanggal_transaksi', '<=', $request->end_date);
+            }
+
+            // Filter by jenis_zis
+            if ($request->jenis_zis) {
+                $query->where('jenis_zis', $request->jenis_zis);
+            }
+
+            $totalAmount = $query->sum('jumlah');
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_amount' => $totalAmount
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghitung total jumlah',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        if ($request->jenis_zis) {
-            $query->where('jenis_zis', $request->jenis_zis);
-        }
-
-        $transactions = $query->get();
-        $summary = [
-            'total_amount' => $transactions->sum('jumlah'),
-            'total_transactions' => $transactions->count(),
-            'by_type' => $transactions->groupBy('jenis_zis')->map(function ($items) {
-                return [
-                    'count' => $items->count(),
-                    'amount' => $items->sum('jumlah')
-                ];
-            })
-        ];
-
-        return response()->json([
-            'transactions' => $transactions,
-            'summary' => $summary
-        ]);
     }
 }

@@ -30,6 +30,10 @@ export default {
           500: '#ef4444',
           600: '#dc2626',
         }
+      },
+      fontFamily: {
+        sans: ['Inter', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
       }
     },
   },

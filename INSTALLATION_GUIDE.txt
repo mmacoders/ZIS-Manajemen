@@ -1,0 +1,300 @@
+# SISTEM INFORMASI ZIS - PANDUAN INSTALASI
+
+## 📋 DAFTAR ISI
+1. Prasyarat Sistem
+2. Teknologi yang Digunakan
+3. Instalasi Backend (Laravel)
+4. Instalasi Frontend (Vue.js)
+5. Konfigurasi Database
+6. Menjalankan Aplikasi
+7. Akun Demo
+8. Troubleshooting
+
+---
+
+## 1. PRASYARAT SISTEM
+
+Sebelum menginstal aplikasi, pastikan sistem Anda memenuhi persyaratan berikut:
+
+### Sistem Operasi:
+- Windows 10/11/Server (64-bit)
+- macOS 10.15 atau lebih baru
+- Linux (Ubuntu 20.04+, CentOS 8+, atau distribusi lainnya)
+
+### Software yang Diperlukan:
+- PHP 8.2 atau lebih baru
+- Composer (package manager PHP)
+- Node.js 18 atau lebih baru
+- npm (Node Package Manager) - biasanya sudah termasuk dengan Node.js
+- MySQL 8.0 atau MariaDB 10.6+
+- Git (untuk version control)
+
+### Software Tambahan (Opsional):
+- Database management tool (phpMyAdmin, MySQL Workbench, dsb)
+- Code editor (VS Code, PHPStorm, Sublime Text, dsb)
+
+---
+
+## 2. TEKNOLOGI YANG DIGUNAKAN
+
+### Backend:
+- Laravel 12 Framework
+- PHP 8.2+
+- MySQL Database
+- Laravel Sanctum (Authentication)
+- Pusher (Real-time notifications)
+
+### Frontend:
+- Vue.js 3 dengan TypeScript
+- Tailwind CSS (Styling)
+- Vite (Build tool)
+- Pinia (State management)
+- Chart.js (Data visualization)
+- Tesseract.js (OCR functionality)
+
+### Package PHP yang Diperlukan:
+- laravel/framework (^12.0)
+- laravel/sanctum (^4.2)
+- barryvdh/laravel-dompdf (^3.1)
+- maatwebsite/excel (^3.1)
+- pusher/pusher-php-server (^2.1)
+
+### Package Node.js yang Diperlukan:
+- vue (^3.5.22)
+- axios (^1.11.0)
+- tailwindcss (^3.4.17)
+- @vitejs/plugin-vue (^6.0.1)
+- chart.js (^4.5.0)
+- tesseract.js (^6.0.1)
+- lucide-vue-next (^0.542.0)
+
+---
+
+## 3. INSTALASI BACKEND (LARAVEL)
+
+### Langkah 1: Clone atau Download Repository
+```bash
+git clone <repository-url>
+# atau ekstrak file ZIP ke direktori kerja Anda
+```
+
+### Langkah 2: Navigasi ke Direktori Proyek
+```bash
+cd zis-system
+```
+
+### Langkah 3: Install Dependencies PHP
+```bash
+composer install
+```
+
+### Langkah 4: Konfigurasi Environment
+```bash
+# Copy file konfigurasi contoh
+cp .env.example .env
+# atau di Windows:
+copy .env.example .env
+```
+
+### Langkah 5: Generate Application Key
+```bash
+php artisan key:generate
+```
+
+### Langkah 6: Konfigurasi Database
+Edit file `.env` dan sesuaikan konfigurasi database:
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=zis_system
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+---
+
+## 4. INSTALASI FRONTEND (VUE.JS)
+
+### Langkah 1: Install Dependencies Node.js
+```bash
+npm install
+```
+
+Catatan: Proses ini mungkin memakan waktu beberapa menit tergantung koneksi internet.
+
+### Langkah 2: Build Assets (Opsional untuk Production)
+```bash
+npm run build
+```
+
+---
+
+## 5. KONFIGURASI DATABASE
+
+### Langkah 1: Buat Database
+Buat database MySQL bernama `zis_system` menggunakan tools seperti:
+- phpMyAdmin
+- MySQL Workbench
+- Command line MySQL
+
+### Langkah 2: Jalankan Migrations
+```bash
+php artisan migrate
+```
+
+### Langkah 3: Jalankan Seeders (Data Demo)
+```bash
+php artisan db:seed
+```
+
+Atau untuk fresh installation:
+```bash
+php artisan migrate:fresh --seed
+```
+
+### Langkah 4: Setup Storage Link
+```bash
+php artisan storage:link
+```
+
+---
+
+## 6. MENJALANKAN APLIKASI
+
+### Opsi 1: Mode Development (Direkomendasikan)
+```bash
+# Terminal 1 - Backend Server
+php artisan serve
+
+# Terminal 2 - Frontend Development Server
+npm run dev
+```
+
+### Opsi 2: Mode Development dengan Semua Layanan
+```bash
+# Menjalankan semua layanan sekaligus (server, queue, vite)
+composer run dev
+```
+
+### Opsi 3: Mode Development dengan Logs
+```bash
+# Menjalankan semua layanan dengan logging
+composer run dev-with-logs
+```
+
+### Akses Aplikasi:
+- Backend API: http://localhost:8000
+- Frontend: http://localhost:8000 (sama dengan backend karena integrated)
+- Vite Dev Server: http://localhost:5173 (otomatis dimulai)
+
+---
+
+## 7. AKUN DEMO
+
+Setelah menjalankan seeder, gunakan akun berikut untuk login:
+
+### Administrator
+- Email: admin@zis.com
+- Password: password
+- Akses: Semua modul + Akuntansi Syariah + BAZNAS
+
+### Bidang 1 (Pengumpulan)
+- Email: bidang1@zis.com
+- Password: password
+- Akses: Modul Pengumpulan + Akuntansi Syariah
+
+### Bidang 2 (Distribusi)
+- Email: bidang2@zis.com
+- Password: password
+- Akses: Modul Distribusi & Pemberdayaan
+
+### Bidang 4 (Arsip)
+- Email: bidang4@zis.com
+- Password: password
+- Akses: Modul Arsip Surat
+
+---
+
+## 8. TROUBLESHOOTING
+
+### Masalah Umum dan Solusi:
+
+#### 1. Error "Table already exists" saat Migration
+```bash
+php artisan migrate:fresh --seed
+```
+
+#### 2. Error Tailwind CSS Configuration
+Pastikan file `tailwind.config.js` dan `postcss.config.js` menggunakan sintaks ES module:
+```javascript
+export default {
+  // konfigurasi
+}
+```
+
+#### 3. Error Laravel Sanctum Authentication
+```bash
+php artisan migrate --path=database/migrations/2019_12_14_000001_create_personal_access_tokens_table.php
+```
+
+#### 4. Error Operator && di Windows PowerShell
+Gunakan titik koma sebagai pemisah:
+```bash
+cd "path"; php artisan command
+```
+
+#### 5. Error "Vite manifest not found"
+Jalankan server development Vite:
+```bash
+npm run dev
+```
+
+#### 6. Masalah OCR Processing
+Tips untuk hasil OCR yang lebih baik:
+- Gunakan gambar resolusi tinggi (minimal 300 DPI)
+- Pastikan pencahayaan dan kontras yang baik
+- Hindari bayangan atau silau pada dokumen
+- Jaga dokumen tetap rata dan sejajar
+- Gunakan font yang jelas dan mudah dibaca
+
+#### 7. Optimasi Performa OCR
+- Kompres gambar sebelum upload (< 2MB direkomendasikan)
+- Gunakan format gambar yang tepat (JPEG untuk foto, PNG untuk teks)
+- Pastikan koneksi internet stabil untuk loading Tesseract.js
+
+#### 8. Perbedaan Struktur Proyek
+Jika perubahan tidak muncul di browser:
+```bash
+# Untuk setup terintegrasi (direkomendasikan):
+cd zis-system
+npm run dev          # Frontend
+php artisan serve    # Backend
+# Akses: http://localhost:8000
+```
+
+---
+
+## 📞 DUKUNGAN
+
+Untuk pertanyaan atau masalah teknis, silakan:
+1. Buka issue di repository GitHub
+2. Hubungi tim pengembang
+3. Konsultasikan dengan dokumentasi resmi Laravel dan Vue.js
+
+---
+
+## 🔄 PEMBARUAN
+
+Untuk memperbarui aplikasi ke versi terbaru:
+```bash
+git pull origin main
+composer install
+npm install
+php artisan migrate
+```
+
+---
+
+Dokumen ini terakhir diperbarui: October 13, 2025
+Versi Aplikasi: v2.5.0

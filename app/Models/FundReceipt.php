@@ -16,7 +16,7 @@ class FundReceipt extends Model
         'sumber_dana',
         'jumlah_setor',
         'jenis_dana',
-        'muzakki_id',
+        'donatur_id',
         'upz_id',
         'keterangan',
         'bukti_transfer'
@@ -27,9 +27,9 @@ class FundReceipt extends Model
         'jumlah_setor' => 'decimal:2'
     ];
 
-    public function muzakki()
+    public function donatur()
     {
-        return $this->belongsTo(Muzakki::class);
+        return $this->belongsTo(Donatur::class, 'donatur_id');
     }
 
     public function upz()

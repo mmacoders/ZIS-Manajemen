@@ -70,7 +70,7 @@ class FraudDetectionDemoSeeder extends Seeder
                 
                 ZisTransaction::create([
                     'nomor_transaksi' => 'TRX-NORM' . str_pad($i, 3, '0', STR_PAD_LEFT) . str_pad($j, 2, '0', STR_PAD_LEFT),
-                    'muzakki_id' => $donor->id,
+                    'donatur_id' => $donor->id,
                     'jumlah' => $amount,
                     'jenis_zis' => ['zakat', 'infaq', 'sedekah'][rand(0, 2)],
                     'tanggal_transaksi' => Carbon::now()->subDays(rand(1, 60)),
@@ -103,7 +103,7 @@ class FraudDetectionDemoSeeder extends Seeder
         // Create an extremely unusually large transaction (FRAUD!)
         ZisTransaction::create([
             'nomor_transaksi' => 'TRX-FRAUD001',
-            'muzakki_id' => $donor->id,
+            'donatur_id' => $donor->id,
             'jumlah' => 50000000, // 50 million - extremely unusual!
             'jenis_zis' => 'zakat',
             'tanggal_transaksi' => Carbon::now()->subDays(5),
@@ -163,7 +163,7 @@ class FraudDetectionDemoSeeder extends Seeder
         // Create a transaction at an unusual time (2:30 AM) - FRAUD!
         $transaction = ZisTransaction::create([
             'nomor_transaksi' => 'TRX-TIME001',
-            'muzakki_id' => $donor->id,
+            'donatur_id' => $donor->id,
             'jumlah' => 2000000,
             'jenis_zis' => 'infaq',
             'tanggal_transaksi' => Carbon::now()->subDays(2),

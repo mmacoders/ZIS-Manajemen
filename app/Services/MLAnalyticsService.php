@@ -3,16 +3,17 @@
 namespace App\Services;
 
 use App\Models\ZisTransaction;
-use App\Models\Muzakki;
 use App\Models\Distribution;
+use App\Models\Donatur;
 use App\Models\Mustahiq;
-use App\Models\Program;
 use App\Models\MLAnalyticsPrediction;
 use App\Models\MLLearningData;
 use App\Models\MLAnalyticsCache;
-use Illuminate\Support\Collection;
+use App\Models\Program;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class MLAnalyticsService
 {
@@ -98,7 +99,7 @@ class MLAnalyticsService
      */
     public function analyzeDonorPatterns(): array
     {
-        $donors = Muzakki::with(['zisTransactions' => function($query) {
+        $donors = Donatur::with(['zisTransactions' => function($query) {
             $query->where('tanggal_transaksi', '>=', Carbon::now()->subYear());
         }])->get();
 
@@ -430,7 +431,7 @@ class MLAnalyticsService
 
     private function detectDuplicateDonors(): array
     {
-        return Muzakki::select('nik', DB::raw('COUNT(*) as count'))
+        return Donatur::select('nik', DB::raw('COUNT(*) as count'))
             ->groupBy('nik')
             ->having('count', '>', 1)
             ->with('zisTransactions')
@@ -444,7 +445,7 @@ class MLAnalyticsService
         $threshold = $avgAmount * 10; // 10x average is unusual
 
         return ZisTransaction::where('jumlah', '>', $threshold)
-            ->with(['muzakki'])
+            ->with(['donatur'])
             ->get()
             ->map(function($transaction) use ($avgAmount) {
                 $transaction->anomaly_score = $transaction->jumlah / $avgAmount;
@@ -470,7 +471,7 @@ class MLAnalyticsService
         // Transactions occurring at unusual times
         return ZisTransaction::whereTime('created_at', '<', '06:00:00')
             ->orWhereTime('created_at', '>', '22:00:00')
-            ->with('muzakki')
+            ->with('donatur')
             ->get()
             ->toArray();
     }
@@ -485,7 +486,7 @@ class MLAnalyticsService
             'total_donations' => $totalDonations,
             'total_distributions' => $totalDistributions,
             'efficiency_percentage' => $efficiency,
-            'active_donors_count' => Muzakki::whereHas('zisTransactions', function($query) {
+            'active_donors_count' => Donatur::whereHas('zisTransactions', function($query) {
                 $query->where('tanggal_transaksi', '>=', Carbon::now()->subMonths(6));
             })->count(),
             'active_beneficiaries_count' => Mustahiq::whereHas('distributions', function($query) {
@@ -588,8 +589,8 @@ class MLAnalyticsService
 
     private function calculateDonationEfficiency(): float
     {
-        $totalDonors = Muzakki::count();
-        $activeDonors = Muzakki::whereHas('zisTransactions', function($query) {
+        $totalDonors = Donatur::count();
+        $activeDonors = Donatur::whereHas('zisTransactions', function($query) {
             $query->where('tanggal_transaksi', '>=', Carbon::now()->subMonths(12));
         })->count();
 
@@ -640,7 +641,7 @@ class MLAnalyticsService
     {
         return [
             'total_transactions' => ZisTransaction::count(),
-            'total_donors' => Muzakki::count(),
+            'total_donors' => Donatur::count(),
             'total_beneficiaries' => Mustahiq::count(),
             'total_distributions' => Distribution::count(),
             'total_programs' => Program::count(),

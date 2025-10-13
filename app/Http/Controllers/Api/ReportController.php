@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ZisTransaction;
 use App\Models\Distribution;
-use App\Models\Muzakki;
+use App\Models\Donatur;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,16 +54,16 @@ class ReportController extends Controller
                 ->orderBy('month')
                 ->get();
 
-            // Top Muzakki
-            $topMuzakki = ZisTransaction::where('status', 'verified')
+            // Top Donatur
+            $topDonatur = ZisTransaction::where('status', 'verified')
                 ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
-                ->with('muzakki')
+                ->with('donatur')
                 ->selectRaw('
-                    muzakki_id,
+                    donatur_id,
                     SUM(jumlah) as total_contribution,
                     COUNT(*) as total_transactions
                 ')
-                ->groupBy('muzakki_id')
+                ->groupBy('donatur_id')
                 ->orderBy('total_contribution', 'desc')
                 ->limit(10)
                 ->get();
@@ -92,7 +92,7 @@ class ReportController extends Controller
                     'zis_collection' => $zisCollection,
                     'distribution_summary' => $distributionSummary,
                     'monthly_trends' => $monthlyTrends,
-                    'top_muzakki' => $topMuzakki
+                    'top_donatur' => $topDonatur
                 ]
             ]);
         } catch (\Exception $e) {
@@ -107,7 +107,7 @@ class ReportController extends Controller
     public function exportCSV(Request $request)
     {
         try {
-            $type = $request->type ?? 'zis'; // zis, distribution, muzakki
+            $type = $request->type ?? 'zis'; // zis, distribution, donatur
             $startDate = $request->start_date ?? now()->startOfMonth();
             $endDate = $request->end_date ?? now()->endOfMonth();
 
@@ -121,16 +121,16 @@ class ReportController extends Controller
                 $file = fopen('php://output', 'w');
 
                 if ($type === 'zis') {
-                    fputcsv($file, ['No Transaksi', 'Tanggal', 'Nama Muzakki', 'Jenis ZIS', 'Jumlah', 'Status']);
+                    fputcsv($file, ['No Transaksi', 'Tanggal', 'Nama Donatur', 'Jenis ZIS', 'Jumlah', 'Status']);
                     
-                    ZisTransaction::with('muzakki')
+                    ZisTransaction::with('donatur')
                         ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
                         ->chunk(1000, function($transactions) use ($file) {
                             foreach ($transactions as $transaction) {
                                 fputcsv($file, [
                                     $transaction->nomor_transaksi,
                                     $transaction->tanggal_transaksi,
-                                    $transaction->muzakki->nama ?? '-',
+                                    $transaction->donatur->nama ?? '-',
                                     ucfirst($transaction->jenis_zis),
                                     number_format($transaction->jumlah, 0, ',', '.'),
                                     ucfirst($transaction->status)
@@ -154,18 +154,18 @@ class ReportController extends Controller
                                 ]);
                             }
                         });
-                } elseif ($type === 'muzakki') {
+                } elseif ($type === 'donatur') {
                     fputcsv($file, ['Nama', 'NIK', 'Jenis', 'Alamat', 'Telepon', 'Email']);
                     
-                    Muzakki::chunk(1000, function($muzakkis) use ($file) {
-                        foreach ($muzakkis as $muzakki) {
+                    Donatur::chunk(1000, function($donaturs) use ($file) {
+                        foreach ($donaturs as $donatur) {
                             fputcsv($file, [
-                                $muzakki->nama,
-                                $muzakki->nik,
-                                ucfirst($muzakki->jenis),
-                                $muzakki->alamat,
-                                $muzakki->telepon ?? '-',
-                                $muzakki->email ?? '-'
+                                $donatur->nama,
+                                $donatur->nik,
+                                ucfirst($donatur->jenis),
+                                $donatur->alamat,
+                                $donatur->telepon ?? '-',
+                                $donatur->email ?? '-'
                             ]);
                         }
                     });
@@ -187,7 +187,7 @@ class ReportController extends Controller
     public function exportPDF(Request $request)
     {
         try {
-            $type = $request->type ?? 'zis'; // zis, distribution, muzakki
+            $type = $request->type ?? 'zis'; // zis, distribution, donatur
             $startDate = $request->start_date ?? now()->startOfMonth();
             $endDate = $request->end_date ?? now()->endOfMonth();
             $user = auth()->user();
@@ -195,7 +195,7 @@ class ReportController extends Controller
             $filename = $type . '_report_' . date('Y-m-d') . '.pdf';
 
             if ($type === 'zis') {
-                $transactions = ZisTransaction::with(['muzakki', 'upz'])
+                $transactions = ZisTransaction::with(['donatur', 'upz'])
                     ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
                     ->orderBy('tanggal_transaksi', 'desc')
                     ->get();
@@ -213,17 +213,17 @@ class ReportController extends Controller
                 $pdf = Pdf::loadView('pdf.distributions', compact('distributions', 'startDate', 'endDate', 'user'))
                     ->setPaper('a4', 'landscape');
 
-            } elseif ($type === 'muzakki') {
+            } elseif ($type === 'donatur') {
                 $jenis = $request->jenis;
-                $query = Muzakki::query();
+                $query = Donatur::query();
                 
                 if ($jenis) {
                     $query->where('jenis', $jenis);
                 }
                 
-                $muzakki = $query->orderBy('nama')->get();
+                $donatur = $query->orderBy('nama')->get();
 
-                $pdf = Pdf::loadView('pdf.muzakki', compact('muzakki', 'jenis', 'user'))
+                $pdf = Pdf::loadView('pdf.donatur', compact('donatur', 'jenis', 'user'))
                     ->setPaper('a4', 'landscape');
 
             } else {
@@ -253,17 +253,16 @@ class ReportController extends Controller
 
             // Get summary data
             $summaryData = $this->getSummaryData($startDate, $endDate);
-
+            
             $pdf = Pdf::loadView('pdf.summary-report', compact('summaryData', 'startDate', 'endDate', 'user'))
                 ->setPaper('a4', 'portrait');
 
-            $filename = 'summary_report_' . date('Y-m-d') . '.pdf';
-            return $pdf->download($filename);
+            return $pdf->download('summary_report_' . date('Y-m-d') . '.pdf');
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengexport laporan ringkasan',
+                'message' => 'Terjadi kesalahan saat mengexport PDF',
                 'error' => $e->getMessage()
             ], 500);
         }
@@ -294,27 +293,24 @@ class ReportController extends Controller
             ->groupBy('program_id')
             ->get();
 
-        // Summary totals
-        $totalCollection = ZisTransaction::where('status', 'verified')
+        // Top Donatur
+        $topDonatur = ZisTransaction::where('status', 'verified')
             ->whereBetween('tanggal_transaksi', [$startDate, $endDate])
-            ->sum('jumlah');
-
-        $totalDistribution = Distribution::where('status', 'completed')
-            ->whereBetween('tanggal_distribusi', [$startDate, $endDate])
-            ->sum('jumlah');
+            ->with('donatur')
+            ->selectRaw('
+                donatur_id,
+                SUM(jumlah) as total_contribution,
+                COUNT(*) as total_transactions
+            ')
+            ->groupBy('donatur_id')
+            ->orderBy('total_contribution', 'desc')
+            ->limit(10)
+            ->get();
 
         return [
-            'period' => [
-                'start_date' => $startDate,
-                'end_date' => $endDate
-            ],
-            'summary' => [
-                'total_collection' => $totalCollection,
-                'total_distribution' => $totalDistribution,
-                'balance' => $totalCollection - $totalDistribution
-            ],
             'zis_collection' => $zisCollection,
-            'distribution_summary' => $distributionSummary
+            'distribution_summary' => $distributionSummary,
+            'top_donatur' => $topDonatur
         ];
     }
 }

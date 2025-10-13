@@ -82,6 +82,13 @@
             <div>Bidang 1: bidang1@zis.com / password</div>
             <div>Bidang 2: bidang2@zis.com / password</div>
             <div>Bidang 4: bidang4@zis.com / password</div>
+            <div class="mt-2 pt-2 border-t border-gray-200">
+              <div class="font-medium text-gray-700">Akun Wakil Bidang:</div>
+            </div>
+            <div>Wakil Bidang I: wakil1@zis.com / password</div>
+            <div>Wakil Bidang II: wakil2@zis.com / password</div>
+            <div>Wakil Bidang III: wakil3@zis.com / password</div>
+            <div>Wakil Bidang IV: wakil4@zis.com / password</div>
           </div>
         </div>
       </form>

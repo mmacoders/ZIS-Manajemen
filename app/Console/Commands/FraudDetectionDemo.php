@@ -45,7 +45,7 @@ class FraudDetectionDemo extends Command
                 if (strpos($transaction['keterangan'] ?? '', 'FRAUD DEMO') !== false) {
                     $this->line("   - Transaction ID: {$transaction['id']}");
                     $this->line("   - Amount: Rp " . number_format($transaction['jumlah'], 0, ',', '.'));
-                    $this->line("   - Donor: " . ($transaction['muzakki']['nama'] ?? 'Unknown'));
+                    $this->line("   - Donor: " . ($transaction['donatur']['nama'] ?? 'Unknown'));
                     $this->line("   - Description: {$transaction['keterangan']}");
                     $this->line("   - Anomaly Score: " . round($transaction['anomaly_score'], 2) . "x above average");
                     $this->line('');
@@ -84,7 +84,7 @@ class FraudDetectionDemo extends Command
                     
                     $this->line("   - Transaction ID: {$transaction['id']}");
                     $this->line("   - Amount: Rp " . number_format($transaction['jumlah'], 0, ',', '.'));
-                    $this->line("   - Donor: " . ($transaction['muzakki']['nama'] ?? 'Unknown'));
+                    $this->line("   - Donor: " . ($transaction['donatur']['nama'] ?? 'Unknown'));
                     $this->line("   - Created at: {$createdTime} (unusual time)");
                     $this->line("   - Transaction date: {$transactionDate}");
                     $this->line("   - Description: {$transaction['keterangan']}");

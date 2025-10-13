@@ -532,13 +532,24 @@ const saveUpz = async () => {
       response = await axios.post('/upz', form.value)
     }
     
-    if (response.data.success) {
-      alert(response.data.message || 'Data berhasil disimpan')
+    console.log(response.data)
+    
+    if (response.data.id || response.data.nama) {
+      alert('Data berhasil disimpan')
       await fetchUpz(pagination.value.current_page)
       closeModal()
     } else {
-      alert('Terjadi kesalahan: ' + (response.data.message || 'Unknown error'))
+      alert('Terjadi kesalahan ')
     }
+
+    // if (response.data.success) {
+    //   alert(response.data.message || 'Data berhasil disimpan')
+    //   await fetchUpz(pagination.value.current_page)
+    //   closeModal()
+    // } else {
+    //   alert('Terjadi kesalahan: ' + (response.data.message || 'Unknown error'))
+    // }
+    
   } catch (error) {
     console.error('Error saving UPZ:', error)
     if (error.response?.data?.errors) {
